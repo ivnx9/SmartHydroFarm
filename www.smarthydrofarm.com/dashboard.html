@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>SHVF Dashboard</title>
+   <style>
+   :root {
+       --accent: #00ff8c;
+   }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      display: flex;
+      height: 100vh;
+      background-color: #f4f4f4;
+    }/* --- Better buttons & small polish --- */
+    
+    
+    
+    .device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.device-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+}
+
+.device-row:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.device-row.active {
+  background: #111827;
+  color: #e5e7eb;
+  border-color: var(--accent);
+}
+
+.device-row small {
+  display: block;
+  opacity: .8;
+  font-size: 11px;
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+    
+    
+    
+button {
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  background: #111827;
+  color: #e5e7eb;
+  transition: background .2s, transform .1s, box-shadow .2s;
+}
+
+button:hover {
+  background: #1f2937;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+button.btn-primary {
+  background: var(--accent);
+  color: #02110a;
+  box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+}
+
+button.btn-primary:hover {
+  background: #34d399;
+  box-shadow: 0 6px 16px rgba(16,185,129,0.6);
+}
+
+button.btn-ghost {
+  background: transparent;
+  border-radius: 8px;
+  padding: 6px 12px;
+  border: 1px solid rgba(148,163,184,0.5);
+}
+
+.sidebar a {
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.sidebar a:hover {
+  background: #111827;
+  border-color: rgba(148,163,184,0.5);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Device quick selector in header */
+.header-device {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.header-device select {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  font-size: 13px;
+}
+
+    
+    
+    
+   .sidebar {
+      width: 250px;
+      height: 100%;
+      background: #222;
+      color: white;
+      padding: 20px;
+      display: flex;
+      position: fixed;
+      flex-direction: column;
+      transition: transform 0.3s ease-in-out;
+      z-index: 5;
+    }
+    
+    .sidebar h2 {
+      margin-bottom: 20px;
+    }
+    
+    .sidebar a {
+      text-decoration: none;
+      color: white;
+      padding: 10px;
+      margin: 5px 0;
+      display: block;
+      background: #333;
+      border-radius: 5px;
+    }
+    
+    .sidebar a:hover {
+      background: #555;
+    }
+
+    
+    .main-content {
+      flex: 1;
+      padding: 20px;
+    }
+    
+    .header {
+      background: white;
+      padding: 15px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .content {
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .menu-btn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: #222;
+      color: white;
+      border: none;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 5;
+    }
+    
+    /* Floating Chat Container */
+    .chat-support-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999991;
+      font-family: Arial, sans-serif;
+    }
+    
+    .chat-toggle {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background-color: #0078D7;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      z-index: 5;
+    }
+    
+    .chat-window {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      height: 400px;
+      display: none;
+      flex-direction: column;
+      width: 320px;
+      max-height: 500px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+    
+    .chat-header {
+      background: #0078D7;
+      color: white;
+      padding: 12px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .chat-header span {
+      font-size: 16px;
+    }
+    
+    .chat-close-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 8px;
+      transition: transform 0.2s ease;
+    }
+    
+    .chat-close-btn:hover {
+      transform: scale(1.2);
+      color: #ffdddd;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      overflow-y: auto;
+      max-height: 300px;
+      background: #f9f9f9;
+    }
+    
+    .chat-messages .message {
+      margin: 10px 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      max-width: 80%;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    
+    .message.user {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+      margin-left: auto;
+      margin-right: 0;
+      border-top-right-radius: 0;
+      border-top-left-radius: 12px;
+    }
+    
+    .message.bot {
+      background-color: #eee;
+      align-self: flex-start;
+    }
+    
+    .message pre {
+      background: #f1f1f1;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    
+    .message code {
+      background: #f0f0f0;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    
+    .message blockquote {
+      border-left: 4px solid #ccc;
+      padding-left: 10px;
+      color: #666;
+    }
+    
+    .chat-input-area {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    
+    .chat-input-area input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+    }
+    
+    .chat-input-area button {
+      padding: 10px 15px;
+      border: none;
+      background: #0078D7;
+      color: white;
+      cursor: pointer;
+    }
+    
+    @media (min-width: 768px) {
+      .dashboard-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 20px;
+        overflow: hidden;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .chat-window {
+        width: 95vw;
+        max-height: 90vh;
+        right: 10px;
+        left: 10px;
+      }
+    
+      .dashboard-card-2 {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+    
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        transform: translateX(-100%);
+      }
+    
+      .sidebar.active {
+        transform: translateX(0);
+      }
+    
+      .menu-btn {
+        display: block;
+      }
+    
+      .chat-support-container-window {
+        position: fixed;
+        bottom: 50px;
+        right: 20px;
+        z-index: 9999;
+      }
+    
+      .chat-window {
+        position: fixed;
+        height: 400px;
+        bottom: 30px;
+        right: 20px;
+      }
+    }
+    
+    img {
+      border: 4px solid #4CAF50;
+      max-width: 100%;
+      height: auto;
+      animation: cctvPulse 2s infinite;
+    }
+    
+    @keyframes cctvPulse {
+      0% { border: 4px solid #00FF41; }
+      50% { border: 4px solid #000000; }
+      100% { border: 4px solid #00FF41; }
+    }
+    
+    svg {
+      width: 100%;
+      height: 180px;
+    }
+    
+    .value {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: bold;
+      color: #1a1a1a;
+      pointer-events: none;
+    }
+    
+    .value-2 {
+      position: absolute;
+      left: 55%;
+      top: 35%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      font-weight: bold;
+      color: #333;
+      pointer-events: none;
+    }
+    
+    #weatherDisplay {
+      font-size: 18px;
+    }
+    
+    /* CSS Grid */
+    .dashboard-grid,
+    .dashbosard-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      overflow: hidden;
+    }
+    
+    .dashboard-card,
+    .ddashboard-card-2 {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .dashboard-card h4 {
+      margin-bottom: 10px;
+    }
+    
+    /* Gauge Placeholder */
+    .gauge {
+      width: 100px;
+      height: 100px;
+      background: #f1f1f1;
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 10px 50px;
+    }
+    
+    .gauge .value {
+      padding-bottom: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    #snapshdot {
+      width: 100%;
+      height: 100%;
+    }
+    
+    #space {
+      width: 250px;
+      height: 100%;
+      color: white;
+      padding: 20px;
+      z-index: 0;
+    }
+    
+    .relay-grid {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .relay-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .relay-state {
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .relay-state.on {
+      background: #d4f8e8;
+      color: #1fa866;
+    }
+    
+    .relay-state.off {
+      background: #ffe0e0;
+      color: #c0392b;
+    }
+    .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:20px;color:var(--accent)}
+    .logo i{font-size:20px}
+   </style>
+</head>
+<body>
+
+    <div class="chat-toggle" onclick="toggleChatSupport()"><i class="fa-regular fa-message"></i></div>
+    <button class="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+    <div class="sidebar" id="sidebar">
+            <div class="logo">
+             <i class="fas fa-seedling"></i>
+             <span>SmartHydroFarm</span>
+            </div><br/>
+        
+        <a href="#" onclick="changeContent('Dashboard')">Dashboard</a>
+        <a href="#" onclick="changeContent('Control & Configurations')">Control & Configurations</a>
+        <a href="#" onclick="changeContent('API Webhooks')">API Webhooks</a>
+        <!--a href="#" onclick="changeContent('Account Settings')">Account Settings</a-->
+        <a href="#" onclick="changeContent('About')">About</a>
+	<a href="#" onclick="logout()">Logout</a>
+
+    </div>
+    <div id="space"></div>
+    <div class="main-content">
+        <div class="header">
+  <h1 id="page-title">Dashboard</h1>
+  <div class="header-device">
+    <span style="opacity:.8;">Active device:</span>
+    <select id="headerDeviceSelect">
+      <!-- populated by JS -->
+    </select>
+  </div>
+</div>
+
+
+        <!-- Dashboard -->
+        <div class="content" id="page-content1">
+          <!--p style="font-weight:bold; margin:5px;">CCTV Live snapshot</p>
+                      <img id="snapshot" src="images/latest.jpg" alt="Live Image"-->
+                  <h3 style="margin-bottom: 15px;">Smart Farm Live Dashboard</h3>
+                <div class="dashboard-grid-2">
+                    <!-- CCTV -->
+                   <div class="dashboard-card">
+                    <h4>CCTV Live Snapshot</h4>
+                    <img id="snapshot" src="api//images/SHVF-V1.jpg" alt="Live Image" /><br/>
+                    
+                   
+                  <!-- windy report -->
+                  
+                    <h4>Solar Forecast (by Windy)</h4>
+                    <iframe id="windyFrame" width="100%" height="250" frameborder="0"
+            src="https://embed.windy.com/embed2.html?lat=14.6&lon=120.98&zoom=1&level=surface&overlay=solarpower&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&detailLat=14&detailLon=121&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"></iframe>
+            <br/><h4>Weather Info</h4>
+            <p id="weatherDisplay">Loading...</p>
+                  
+                  </div>
+                <div class="dashboard-grid">
+                  <!-- pH Level -->
+                <div class="dashboard-card">
+                  <h4>pH Level</h4>
+                  <div class="gauge" id="phGauge">
+                    <svg viewBox="0 0 100 50">
+                      <!-- arcs ... -->
+                      <!-- Needle -->
+                      <line id="phNeedle" x1="50" y1="50" x2="50" y2="5"
+                            stroke="#111" stroke-width="2" stroke-linecap="round"
+                            transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div class="value" id="phValue">0.0</div>
+                  </div>
+                </div>
+                
+                <!-- TDS Level -->
+                <div class="dashboard-card">
+                  <h4>TDS (ppm)</h4>
+                  <div class="gauge" id="tdsGauge">
+                    <svg viewBox="0 0 100 50">
+                      <!-- arcs ... -->
+                      <line id="tdsNeedle" x1="50" y1="50" x2="50" y2="5"
+                            stroke="#111" stroke-width="2" stroke-linecap="round"
+                            transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div class="value" id="tdsValue">0</div>
+                  </div>
+                </div>
+                
+                <!-- Water Temperature -->
+                <div class="dashboard-card">
+                  <h4>Water Temperature</h4>
+                  <div class="gauge" id="waterTempGauge">
+                    <svg viewBox="0 0 100 50">
+                      <!-- arcs ... -->
+                      <line id="waterTempNeedle" x1="50" y1="50" x2="50" y2="5"
+                            stroke="#111" stroke-width="2" stroke-linecap="round"
+                            transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div class="value" id="waterTempValue">0°C</div>
+                  </div>
+                </div>
+                
+                <!-- Water Level -->
+                <div class="dashboard-card">
+                  <h4>Water Level (Liters)</h4>
+                  <div class="gauge" id="waterLevelGauge">
+                    <svg viewBox="0 0 100 50">
+                      <!-- arcs ... -->
+                      <line id="waterLevelNeedle" x1="50" y1="50" x2="50" y2="5"
+                            stroke="#111" stroke-width="2" stroke-linecap="round"
+                            transform="rotate(-90 50 50)" />
+                    </svg>
+                    <div class="value" id="waterLevelValue">0 L</div>
+                  </div>
+                </div>
+
+
+                    
+                  <!-- Humidity -->
+                  <div class="dashboard-card">
+                    <h4>Humidity</h4>
+                    <div class="gauge" id="humidityGauge">
+                      <div class="value-2" id="humidityValue">0%
+                      </div>
+                    </div>
+                  </div>
+                    
+                  <!-- Air Temp -->
+                  <div class="dashboard-card">
+                    <h4>Air Temperature</h4>
+                    <div class="gauge" id="airTempGauge">
+                      <div class="value-2" id="airTempValue">0&#8451;
+                      </div>
+                    </div>
+                  </div>
+
+                 <div class="dashboard-card relay-status-card">
+  <h4>Relay Status(actual)</h4>
+  <div class="relay-grid" id="relayStatusDashboard">
+    <div class="relay-item">
+      <span>Automation</span>
+      <span class="relay-state" id="dashAutoState">--</span>
+    </div>
+    <div class="relay-item">
+      <span>Water Pump</span>
+      <span class="relay-state" id="dashWaterState">--</span>
+    </div>
+    <div class="relay-item">
+      <span>Grow Light</span>
+      <span class="relay-state" id="dashGrowState">--</span>
+    </div>
+    <div class="relay-item">
+      <span>Solenoid Valve</span>
+      <span class="relay-state" id="dashSolenoidState">--</span>
+    </div>
+    <div class="relay-item">
+      <span>Mixer</span>
+      <span class="relay-state" id="dashMixerState">--</span>
+    </div>
+  </div>
+</div>
+                    <div class="dashboard-card" style="/*grid-column: 1 / -1;*/">
+                  <h4>Sensor Trend (last 20 polls)</h4>
+                  <svg id="trendSvg" viewBox="0 0 220 100" style="width:100%;height:120px;background:#f8fafc;border-radius:8px;"></svg>
+                  <div style="font-size:11px;opacity:.7;margin-top:6px;">
+                    Green: pH &nbsp;&nbsp; • &nbsp;&nbsp; Blue: TDS
+                  </div>
+                </div>
+
+                </div>
+             </div>
+            </div>
+  <script>
+    setInterval(() => {
+      const img = document.getElementById("snapshot");
+      img.src = "api/images/SHVF-V1.jpg?rand=" + new Date().getTime(); // prevent caching
+    }, 4000); // update every 10 seconds
+  </script>
+        <!-- Control & Configuration -->
+<div class="content" style="display:none" id="page-content2">
+  <h3 style="margin-bottom: 15px;">Controls & Configurations</h3>
+
+  <div class="dashboard-grid-2">
+
+    <!-- Automation & Relays -->
+    <div class="dashboard-card">
+      <h4>Automation & Relays</h4>
+      <div class="relay-grid" style="margin-top:10px">
+        <div class="relay-item">
+          <span>Automation</span>
+          <label class="switch">
+            <input type="checkbox" id="autoToggle">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="relay-item">
+          <span>Water Pump</span>
+          <label class="switch">
+            <input type="checkbox" id="waterToggle">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="relay-item">
+          <span>Grow Light</span>
+          <label class="switch">
+            <input type="checkbox" id="growToggle">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="relay-item">
+          <span>Solenoid Valve</span>
+          <label class="switch">
+            <input type="checkbox" id="solenoidToggle">
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="relay-item">
+          <span>Mixer</span>
+          <label class="switch">
+            <input type="checkbox" id="mixerToggle">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+
+      <div style="font-size:12px;opacity:.8;margin-top:8px">
+        When <b>Automation</b> is ON, the device ignores manual relay states from the cloud (same as your offline UI).
+      </div>
+
+      <style>
+        /* simple iOS-like switch */
+        .switch{position:relative;display:inline-block;width:48px;height:26px}
+        .switch input{opacity:0;width:0;height:0}
+        .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;transition:.2s;border-radius:26px}
+        .slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:white;transition:.2s;border-radius:50%}
+        input:checked + .slider{background:#22c55e}
+        input:checked + .slider:before{transform:translateX(22px)}
+        .slider.round{border-radius:26px}
+      </style>
+    </div>
+
+    <!-- Manual Dosing -->
+    <div class="dashboard-card">
+      <h4>Manual Dosing</h4>
+      <form id="doseForm" class="relay-grid" onsubmit="return false;">
+        <div class="relay-item">
+          <span>Channel</span>
+          <select id="doseChannel" style="width:140px">
+            <option value="A">Nutrient A</option>
+            <option value="B">Nutrient B</option>
+            <option value="PH_UP">pH Up</option>
+            <option value="PH_DOWN">pH Down</option>
+          </select>
+        </div>
+        <div class="relay-item">
+          <span>Dose by mL</span>
+          <input id="doseMl" type="number" min="0" step="0.1" placeholder="e.g. 1.5" style="width:140px">
+        </div>
+        <div class="relay-item">
+          <span>Or dose by ms</span>
+          <input id="doseMs" type="number" min="0" step="10" placeholder="e.g. 1500" style="width:140px">
+        </div>
+        <button id="doseBtn" class="btn-primary" style="margin-top:10px">Dose Now</button>
+        <div id="doseStatus" style="font-size:12px;opacity:.8;margin-top:8px"></div>
+      </form>
+      <div style="font-size:12px;opacity:.8;margin-top:8px">
+        Tip: Fill either <b>mL</b> or <b>ms</b>. If both are set, the device will prefer <b>ms</b>.
+      </div>
+    </div>
+
+    <!-- Plant Profile -->
+    <div class="dashboard-card">
+      <h4>Plant Profile</h4>
+      <form id="plantForm" onsubmit="return false;" class="relay-grid" style="margin-top:10px">
+        <div class="relay-item"><span>Name</span><input id="plantName" placeholder="lettuce"></div>
+        <div class="relay-item">
+          <span>PPM range</span>
+          <div>
+            <input id="ppmMin" type="number" placeholder="min" style="width:100px">
+            <input id="ppmMax" type="number" placeholder="max" style="width:100px">
+          </div>
+        </div>
+        <div class="relay-item">
+          <span>pH target / min / max</span>
+          <div>
+            <input id="phTarget" type="number" step="0.1" placeholder="target" style="width:100px">
+            <input id="phMin" type="number" step="0.1" placeholder="min" style="width:100px">
+            <input id="phMax" type="number" step="0.1" placeholder="max" style="width:100px">
+          </div>
+        </div>
+        <div class="relay-item">
+          <span>Lights on (h:m)</span>
+          <div>
+            <input id="onH" type="number" min="0" max="23" placeholder="h" style="width:70px">
+            <input id="onM" type="number" min="0" max="59" placeholder="m" style="width:70px">
+          </div>
+        </div>
+        <div class="relay-item">
+          <span>Lights off (h:m)</span>
+          <div>
+            <input id="offH" type="number" min="0" max="23" placeholder="h" style="width:70px">
+            <input id="offM" type="number" min="0" max="59" placeholder="m" style="width:70px">
+          </div>
+        </div>
+        <button id="plantSaveBtn" class="btn-primary" style="margin-top:10px">Save Plant Settings</button>
+        <div id="plantStatus" style="font-size:12px;opacity:.8;margin-top:8px"></div>
+      </form>
+    </div>
+
+    <!-- Live Status (mirrors the Dashboard card, but focused on relays) -->
+    <div class="dashboard-card">
+      <h4>Live Status</h4>
+      <div id="liveStatus">
+        <div>pH: <b id="lsPh">-</b></div>
+        <div>TDS: <b id="lsTds">-</b> ppm</div>
+        <div>Water Temp: <b id="lsWater">-</b> °C</div>
+        <div>Air Temp: <b id="lsAir">-</b> °C</div>
+        <div>Humidity: <b id="lsHum">-</b> %</div>
+        <div>Tank depth: <b id="lsDepth">-</b> cm</div>
+        <div>Distance to water: <b id="lsDrumD">-</b> cm</div>
+        <div>Water volume: <b id="lsLiters">-</b> L</div>
+  
+        <div style="margin-top:10px">Relays (actual):</div>
+        
+        <ul style="margin-top:6px;line-height:1.7">
+          <li>Water Pump: <b id="actWater">-</b></li>
+          <li>Grow Light: <b id="actGrow">-</b></li>
+          <li>Solenoid: <b id="actSol">-</b></li>
+          <li>Mixer: <b id="actMixer">-</b></li>
+        </ul>
+        <div style="font-size:12px;opacity:.7;margin-top:6px">
+          Last ACK rev: <span id="ackRev">-</span>,
+          Dose ACK: <span id="ackDose">-</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+        <!-- API webhooks -->
+<div class="content" style="display:none" id="page-content3">
+  <h3 style="margin-bottom: 15px;">API Webhooks &amp; Device Manager</h3>
+
+  <!-- Top: Add Device + Active Device -->
+  <div class="dashboard-card" style="margin-top:10px">
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;justify-content:space-between;">
+
+      <!-- Add Device -->
+      <div style="flex:1;min-width:260px;">
+        <h4>Add Device</h4>
+        <div class="relay-grid" style="margin-top:10px">
+          <div class="relay-item">
+            <span>Device ID</span>
+            <input id="devIdInput" style="width:180px" placeholder="e.g. SHVF-V1">
+          </div>
+          <div class="relay-item">
+            <span>Device Code</span>
+            <input id="devCodeInput" style="width:180px" placeholder="e.g. 12345">
+          </div>
+        </div>
+        <button id="btnCreateDevice" class="btn-primary" style="margin-top:10px">Add Device</button>
+        <div id="devStatus" style="font-size:12px;opacity:.8;margin-top:8px"></div>
+      </div>
+
+      <!-- Active Device -->
+      <div style="flex:1;min-width:220px;">
+        <h4>Active Device (Dashboard)</h4>
+        <p style="font-size:12px;opacity:.8;margin:4px 0 6px;">
+          This device is used for the main dashboard, controls, and tests.
+        </p>
+        <select id="activeDeviceSelect" style="padding:6px 12px;border-radius:999px;border:1px solid #cbd5f5;font-size:13px;min-width:220px;">
+          <!-- filled by JS -->
+        </select>
+        <div id="activeDeviceInfo" style="font-size:12px;opacity:.8;margin-top:6px;">
+          No device selected.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom: 2-column layout (devices list + tester) -->
+  <div class="dashboard-card" style="margin-top:20px">
+    <div style="display:grid;grid-template-columns:minmax(220px,1fr) minmax(260px,1.3fr);gap:20px;align-items:flex-start;">
+
+      <!-- Devices list (left) -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <h4 style="margin:0;">Your Devices</h4>
+          <button id="btnRefreshDevices" class="btn-ghost btn-sm">Refresh</button>
+        </div>
+        <div id="deviceList" class="device-list">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Tester (right) -->
+      <div>
+        <h4 style="margin-bottom:8px;">Webhook Tester</h4>
+        <p style="font-size:12px;opacity:.8;margin-bottom:8px;">
+          Testing <b id="testerDeviceLabel">no device selected</b>.
+        </p>
+        <button id="btnTestPanel" class="btn-primary btn-sm">GET cmd=panel</button>
+        <button id="btnSendDummy" class="btn-ghost btn-sm" style="margin-left:8px;">POST dummy sensor</button>
+        <div style="font-size:12px;opacity:.8;margin-top:8px">
+          Use this to quickly check if <code>webhook.php</code> is working for the selected device.
+        </div>
+        <pre id="panelOutput" style="margin-top:10px;width:100%;max-height:260px;overflow:auto;background:#111;color:#0f0;padding:10px;font-size:11px;border-radius:4px;"></pre>
+      </div>
+
+    </div>
+  </div>
+  
+  
+  <!-- Recent sensor data for all devices -->
+<!--div class="dashboard-card" style="margin-top:20px">
+  <h4>Recent Sensor Data (All Devices)</h4>
+  <p style="font-size:12px;opacity:.8;margin-bottom:6px;">
+    Shows the latest readings from your registered devices (up to last 5 records).
+  </p>
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#f3f4f6;">
+          <th style="padding:6px;border:1px solid #e5e7eb;">Device</th>
+          <th style="padding:6px;border:1px solid #e5e7eb;">Timestamp</th>
+          <th style="padding:6px;border:1px solid #e5e7eb;">pH / TDS</th>
+          <th style="padding:6px;border:1px solid #e5e7eb;">Water Temp</th>
+          <th style="padding:6px;border:1px solid #e5e7eb;">Water Level</th>
+          <th style="padding:6px;border:1px solid #e5e7eb;">Humidity</th>
+          <th style="padding:6px;border:1px solid #e5e7eb;">Air Temp</th>
+          <th style="padding:6px;border:1px solid #e5e7eb;">Relay Status</th>
+        </tr>
+      </thead>
+      <tbody id="deviceDataBody">
+        <tr>
+          <td colspan="8" style="padding:8px;text-align:center;font-size:12px;opacity:.7;">
+            No data yet.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div-->
+
+</div>
+
+
+      <!-- Account settings -->
+      <div class="content" style="display:none" id="page-content4">
+        <p>Content for 4 goes here...</p>
+    </div>
+    <!-- About -->
+    
+    <!-- Landing Page Style About Section -->
+<div class="content" style="display:none" id="page-content5">
+  <div class="dashboard-card" style="text-align:center; padding: 40px;">
+    <h2 style="font-size: 28px; margin-bottom: 10px;">Smart HydroVertical Farm</h2>
+    <p style="max-width: 700px; margin: 0 auto; font-size: 16px; line-height: 1.7;">
+      An IoT-powered solution for automated vertical hydroponics. Monitor pH, TDS, temperature, humidity, and water level remotely with AI-powered chatbot support.
+    </p>
+  </div>
+
+  <div class="dashboard-grid" style="margin-top: 30px;">
+
+    <!-- Developer Profiles -->
+    <div class="dashboard-card">
+      <img src="images/ivan.jpg" alt="Ivan Abueg" style="width:100px; height: 100px; border-radius:50%; margin-bottom:10px;">
+      <h4>Ivan Abueg</h4>
+      <p>Lead Developer – Full-stack programming, IoT & solar integration, electronics assembly</p>
+    </div>
+
+    <div class="dashboard-card">
+      <img src="images/james.jpg" alt="James Bondoc" style="width:100px; border-radius:50%; margin-bottom:10px;">
+      <h4>James P. Bondoc</h4>
+      <p>Hardware Assistant – Supported metalwork & full system development</p>
+    </div>
+
+    <div class="dashboard-card">
+      <img src="images/arnold.jpg" alt="Arnold Cruz" style="width:100px; border-radius:50%; margin-bottom:10px;">
+      <h4>Arnold John E. Cruz</h4>
+      <p>Chassis Fabrication – Helped with chassis & electronics assembly</p>
+    </div>
+
+    <div class="dashboard-card">
+      <img src="images/vince.jpg" alt="Vince Nicodemus" style="width:100px; border-radius:50%; margin-bottom:10px;">
+      <h4>Vince Jheriel C. Nicodemus</h4>
+      <p>Structural Support – Handled frame building</p>
+    </div>
+
+    <div class="dashboard-card">
+      <img src="images/ellaiza.jpg" alt="Ellaiza Contreras" style="width:100px; border-radius:50%; margin-bottom:10px;">
+      <h4>Ellaiza Anne T. Contreras</h4>
+      <p>Documentation – Project assistance & paperwork</p>
+    </div>
+
+    <div class="dashboard-card">
+      <img src="images/isaac.jpg" alt="Isaac Sunpongco" style="width:100px; border-radius:50%; margin-bottom:10px;">
+      <h4>Isaac B. Sunpongco</h4>
+      <p>Research Coordinator – Finalized and formatted research paper</p>
+    </div>
+
+    <div class="dashboard-card">
+      <img src="images/adrian.jpg" alt="Adrian Perez" style="width:100px; border-radius:50%; margin-bottom:10px;">
+      <h4>Adrian T. Perez</h4>
+      <p>Helps in plumbing and fixing PVC pipes</p>
+    </div>
+  </div>
+
+  <!-- Technologies Used Section -->
+  <div class="dashboard-card" style="margin-top: 40px; text-align: center;">
+    <h3 style="margin-bottom: 15px;">Technologies Used</h3>
+    <ul style="max-width: 600px; margin: 0 auto; text-align: left; line-height: 1.8; list-style: disc;">
+      <li>ESP32 / Arduino for automation and sensors</li>
+      <li>HTML, CSS, Vanilla JavaScript</li>
+      <li>PHP API for backend</li>
+      <li>OpenRouter AI integration (chatbot support)</li>
+      <li>Chart.js / SVG for visual analytics</li>
+    </ul>
+  </div>
+
+  <!-- Footer / Version -->
+  <div class="dashboard-card" style="margin-top: 30px; text-align: center;">
+    <p style="font-size: 14px;">Version 1.0.0 – July 2025</p>
+    <p style="font-size: 12px; color: #666;">© 2025 Smart HydroVertical Farm Team</p>
+  </div>
+</div>
+
+
+    </div>
+    <div class="chat-support-container">
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <span>SHVF Customer Support<br/>
+      <span style="font-size:8px; font-style: italic;">A.I support <span id="model_used" style="font-size:8px; font-style: italic;"></span></span></span>
+      <button class="chat-close-btn" onclick="toggleChatSupport()" aria-label="Close chat"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Type your message..." onkeydown="handleEnter(event)" />
+      <button id="msgBtn" onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const latitude = 14.5995; // Replace with your latitude
+  const longitude = 120.9842; // Replace with your longitude
+  window.onload = function() {
+    setTimeout(function() {
+      document.getElementById("windyFrame").src = "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=default&metricTemp=default&metricWind=default&zoom=11&overlay=solarpower&product=ecmwf&level=surface&lat=${latitude}&lon=${longitude}&pressure=true&message=true"
+    }, 1000); // Wait for 1 second before setting the iframe source
+  };
+
+  //const weatherApiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relative_humidity_2m,precipitation,surface_solar_radiation`;
+      const weatherDisplay = document.getElementById("weatherDisplay");
+
+  // Function to fetch and display weather data
+  async function fetchWeatherData() {
+      try {
+          const response = await fetch(
+              `https://api.open-meteo.com/v1/forecast?latitude=14&longitude=120&current_weather=true&hourly=temperature_2m,relative_humidity_2m,precipitation`
+          );
+
+          if (!response.ok) throw new Error("Failed to fetch weather data.");
+          const data = await response.json();
+          
+          // Debug: Log the data for inspection
+          console.log("Weather API Response:", data);
+
+          // Safely extract current weather data
+          const currentTemp = data?.current_weather?.temperature ?? "--";
+          const windSpeed = data?.current_weather?.windspeed ?? "--";
+
+          // Safely extract hourly data
+          const temperature = data?.hourly?.temperature_2m?.[0] ?? "--";
+          const humidity = data?.hourly?.relative_humidity_2m?.[0] ?? "--";
+          const precipitation = data?.hourly?.precipitation?.[0] ?? "--";
+
+          // Display weather data
+          weatherDisplay.innerHTML = `
+              <strong>Current Temperature:</strong> ${currentTemp}°C<br/>
+              <strong>Wind Speed:</strong> ${windSpeed} km/h<br/>
+              <strong>Humidity:</strong> ${humidity}%<br/>
+              <strong>Precipitation:</strong> ${precipitation} mm<br/>
+          `;
+          
+      } catch (error) {
+          console.error("Error fetching weather data:", error);
+          weatherDisplay.innerHTML = "<strong>Error loading weather data. Please try again later.</strong>";
+      }
+  }
+
+  // Fetch data initially and every 10 minutes
+  fetchWeatherData();
+  setInterval(fetchWeatherData, 600000);
+
+  function handleEnter(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault(); // stops the form or default action
+      sendChatMessage();
+    }
+  }
+
+
+  
+    let chatMessagesArray = [];
+    
+    async function sendChatMessage() {
+        const input = document.getElementById("chatInput");
+        const sndbtn = document.getElementById("msgBtn");
+        const msg = input.value.trim();
+        if (!msg) return;
+    
+        const chatMessages = document.getElementById("chatMessages");
+    
+        // Display user message
+        const userMsg = document.createElement("div");
+        userMsg.className = "message user";
+        userMsg.textContent = msg;
+        chatMessages.appendChild(userMsg);
+        input.value = "";
+        sndbtn.disabled = true;
+    
+        // Show typing indicator
+        const typingEl = document.createElement("div");
+        typingEl.className = "message bot typing";
+        typingEl.textContent = "Typing...";
+        chatMessages.appendChild(typingEl);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        const formData = new FormData();
+        formData.append("message", msg);
+
+        try {
+            const response = await fetch("/api/chat.php", {
+                method: "POST",
+                body: formData
+            });
+    
+            const data = await response.json();
+            typingEl.remove();
+            sndbtn.disabled = false;
+    
+            if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+                const reply = data.choices[0].message.content;
+                const botMsg = document.createElement("div");
+                botMsg.className = "message bot";
+                botMsg.innerHTML = marked.parse(reply); // Use marked for Markdown rendering
+                chatMessages.appendChild(botMsg);
+                document.getElementById("model_used").innerHTML = data.provider;
+                chatMessagesArray.push({ role: "assistant", content: reply });
+            } else {
+                const errorMsg = document.createElement("div");
+                errorMsg.className = "message bot";
+                errorMsg.textContent = "Hey grower! 🌾 Thanks for dropping by SmartHydroFarm. Our smart assistant is recharging, like crops soaking up the sun ☀️. We’ll be ready to help you again very soon."; //"AI: Something went wrong.";
+                document.getElementById("model_used").innerHTML = data.provider;
+                chatMessages.appendChild(errorMsg);
+            }
+        } catch (error) {
+            typingEl.remove();
+            sndbtn.disabled = false;
+            const errorMsg = document.createElement("div");
+            errorMsg.className = "message bot";
+            errorMsg.textContent = "Error: " + error.message;
+            chatMessages.appendChild(errorMsg);
+        }
+    
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+
+          function changeContent(title) {
+             if(title == "Dashboard") {
+              document.getElementById("page-title").textContent = title;
+              document.getElementById("page-content1").style.display = "block";
+              document.getElementById("page-content2").style.display = "none";
+              document.getElementById("page-content3").style.display = "none";
+              document.getElementById("page-content4").style.display = "none";
+              document.getElementById("page-content5").style.display = "none";
+
+            } else if(title == "Control & Configurations") {
+
+              document.getElementById("page-title").textContent = title;
+              document.getElementById("page-content1").style.display = "none";
+              document.getElementById("page-content2").style.display = "block";
+              document.getElementById("page-content3").style.display = "none";
+              document.getElementById("page-content4").style.display = "none";
+              document.getElementById("page-content5").style.display = "none";
+
+            } else if(title == "API Webhooks") {
+
+              document.getElementById("page-title").textContent = title;
+              document.getElementById("page-content1").style.display = "none";
+              document.getElementById("page-content2").style.display = "none";
+              document.getElementById("page-content3").style.display = "block";
+              document.getElementById("page-content4").style.display = "none";
+              document.getElementById("page-content5").style.display = "none";
+
+            } /*else if(title == "Account Settings") {
+
+              document.getElementById("page-title").textContent = title;
+              document.getElementById("page-content1").style.display = "none";
+              document.getElementById("page-content2").style.display = "none";
+              document.getElementById("page-content3").style.display = "none";
+              document.getElementById("page-content4").style.display = "block";
+              document.getElementById("page-content5").style.display = "none";
+
+            } */ else if(title == "About") {
+
+              document.getElementById("page-title").textContent = title;
+              document.getElementById("page-content1").style.display = "none";
+              document.getElementById("page-content2").style.display = "none";
+              document.getElementById("page-content3").style.display = "none";
+              document.getElementById("page-content4").style.display = "none";
+              document.getElementById("page-content5").style.display = "block";
+            }
+          }
+
+          function toggleSidebar() {
+
+              document.getElementById("sidebar").classList.toggle("active");
+
+          }
+
+          // chat support function
+
+          function toggleChatSupport() {
+
+    const chat = document.getElementById("chatWindow");
+
+    chat.style.display = chat.style.display === "flex" ? "none" : "flex";
+
+  }
+
+      </script>
+      
+      
+      <script>
+          const token = localStorage.getItem("jwt_token");
+
+	if (!token) {
+	  window.location.href = "index.html";
+	} else {
+	  try {
+	    const payload = JSON.parse(atob(token.split('.')[1]));
+	    console.log("Hello,", payload.username); // You can use it now!
+	  } catch (e) {
+	    console.error("Invalid token", e);
+	    localStorage.removeItem("jwt_token");
+	    window.location.href = "index.html";
+	  }
+	}
+
+function logout() {
+  localStorage.removeItem("jwt_token");
+  window.location.href = "index.html";
+}
+
+
+
+         function getJwt() {
+             return localStorage.getItem("jwt_token");
+          }
+          
+          
+/* ======== CONFIG (set once) ======== */
+const API_BASE = "api/webhook.php";
+
+// defaults (can be overridden from API Webhooks tab)
+let DEVICE_ID   = "SHVF-V1";
+let DEVICE_CODE = "12345";
+
+// active device used for all calls
+let CURRENT_DEVICE_ID   = DEVICE_ID;
+let CURRENT_DEVICE_CODE = DEVICE_CODE;
+
+/* ======== State ======== */
+let desired   = { auto:false, water:false, grow:false, solenoid:false, mixer:false };
+let lastPanel = null;
+
+// Sensor history for mini trend chart
+const history = {
+  ph:  [],
+  tds: []
+};
+
+// Cache of devices loaded from device_admin.php
+// { [device_id]: device_code }
+const deviceCache = {};
+
+
+/* ======== Helpers ======== */
+function onOff(b){ return b ? "ON" : "OFF"; }
+function bool(v){ return !!v; }
+
+function loadActiveDevice() {
+  const savedId   = localStorage.getItem("shvf_device_id");
+  const savedCode = localStorage.getItem("shvf_device_code");
+  if (savedId)   DEVICE_ID   = savedId;
+  if (savedCode) DEVICE_CODE = savedCode;
+  CURRENT_DEVICE_ID   = DEVICE_ID;
+  CURRENT_DEVICE_CODE = DEVICE_CODE;
+}
+
+
+/* ======== API calls (talk directly to webhook.php) ======== */
+
+// GET: panel status (relays + latest sensor)
+async function apiPanel() {
+  const url = `${API_BASE}?cmd=panel`
+            + `&device_id=${encodeURIComponent(CURRENT_DEVICE_ID)}`
+            + `&device_code=${encodeURIComponent(CURRENT_DEVICE_CODE)}`;
+  const res = await fetch(url, { credentials: "same-origin" });
+  if (!res.ok) throw new Error("panel fetch failed: " + res.status);
+  return await res.json();
+}
+
+// POST: set commands / plant config / dosing
+async function apiSetCommands(body) {
+  const payload = {
+    device_id:   CURRENT_DEVICE_ID,
+    device_code: CURRENT_DEVICE_CODE,
+    action:      "set_commands",
+    ...body
+  };
+  const res = await fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify(payload),
+    credentials: "same-origin"
+  });
+  if (!res.ok) throw new Error("set_commands failed: " + res.status);
+  return await res.json();
+}
+
+/* ======== Controls tab binding ======== */
+function bindControls() {
+  const autoEl = document.getElementById("autoToggle");
+  const wEl    = document.getElementById("waterToggle");
+  const gEl    = document.getElementById("growToggle");
+  const sEl    = document.getElementById("solenoidToggle");
+  const mEl    = document.getElementById("mixerToggle");
+
+  autoEl.onchange = async () => {
+    desired.auto = autoEl.checked;
+    try { await apiSetCommands({ auto: desired.auto }); }
+    catch(e){ console.error(e); }
+  };
+
+  // Manual relays (device will still obey its own automation rules)
+  wEl.onchange = async () => { desired.water    = wEl.checked; try{ await apiSetCommands({ water:    desired.water    }); }catch(e){console.error(e);} };
+  gEl.onchange = async () => { desired.grow     = gEl.checked; try{ await apiSetCommands({ grow:     desired.grow     }); }catch(e){console.error(e);} };
+  sEl.onchange = async () => { desired.solenoid = sEl.checked; try{ await apiSetCommands({ solenoid: desired.solenoid }); }catch(e){console.error(e);} };
+  mEl.onchange = async () => { desired.mixer    = mEl.checked; try{ await apiSetCommands({ mixer:    desired.mixer    }); }catch(e){console.error(e);} };
+
+  // Manual dosing
+  document.getElementById("doseBtn").onclick = async () => {
+    const ch = document.getElementById("doseChannel").value;
+    const ml = parseFloat(document.getElementById("doseMl").value || "0");
+    const ms = parseInt(document.getElementById("doseMs").value || "0", 10);
+    const status = document.getElementById("doseStatus");
+
+    // dose_req: monotonic per device
+    const key = `dose_req_seq_${CURRENT_DEVICE_ID}`;
+    let nextReq = parseInt(localStorage.getItem(key) || "100", 10) + 1;
+    localStorage.setItem(key, String(nextReq));
+
+    const payload = { dose_req: nextReq, dose_channel: ch };
+    if (!isNaN(ms) && ms > 0)      payload.dose_ms = ms;
+    else if (!isNaN(ml) && ml > 0) payload.dose_ml = ml;
+
+    try {
+      const r = await apiSetCommands(payload);
+      status.textContent = `Queued dose #${r.dose_req || nextReq} (${r.dose_channel || ch})`;
+    } catch(e) {
+      status.textContent = `Dose queue failed: ${e.message}`;
+    }
+  };
+
+  // Plant profile save
+  document.getElementById("plantSaveBtn").onclick = async () => {
+    const body = {
+      plant_name: document.getElementById("plantName").value || undefined,
+      ppm_min:    parseInt(document.getElementById("ppmMin").value  || "0",10),
+      ppm_max:    parseInt(document.getElementById("ppmMax").value  || "0",10),
+      ph_target:  parseFloat(document.getElementById("phTarget").value || "0"),
+      ph_min:     parseFloat(document.getElementById("phMin").value    || "0"),
+      ph_max:     parseFloat(document.getElementById("phMax").value    || "0"),
+      on_h:       parseInt(document.getElementById("onH").value || "0",10),
+      on_m:       parseInt(document.getElementById("onM").value || "0",10),
+      off_h:      parseInt(document.getElementById("offH").value|| "0",10),
+      off_m:      parseInt(document.getElementById("offM").value|| "0",10),
+    };
+    const clean = {};
+    for (const k in body) {
+      if (body[k] !== undefined && !Number.isNaN(body[k])) clean[k] = body[k];
+    }
+    try {
+      const r = await apiSetCommands(clean);
+      document.getElementById("plantStatus").textContent = `Saved (rev ${r.rev})`;
+    } catch(e) {
+      document.getElementById("plantStatus").textContent = `Save failed: ${e.message}`;
+    }
+  };
+}
+
+
+/*
+function setGauge(value, min, max, needleId, textId, decimals = 1, suffix = "") {
+  const display = document.getElementById(textId);
+  if (!display) return;
+
+  const v = Number(value);
+  if (Number.isNaN(v)) {
+    display.textContent = "--" + suffix;
+    return;
+  }
+
+  // clamp
+  const clamped = Math.min(Math.max(v, min), max);
+  const ratio   = (clamped - min) / (max - min); // 0..1
+  // our semicircle goes from -90° (left) to +90° (right)
+  const angle   = -90 + ratio * 180;
+
+  const needle = document.getElementById(needleId);
+  if (needle) {
+    needle.setAttribute("transform", `rotate(${angle} 50 50)`);
+  }
+
+  display.textContent = v.toFixed(decimals) + suffix;
+}
+*/
+
+function setGauge(value, min, max, needleId, textId, decimals = 1, suffix = "") {
+  const display = document.getElementById(textId);
+  if (!display) return;
+
+  // kung wala pang value, huwag pilitin sa 0
+  if (value === null || value === undefined || value === "") {
+    display.textContent = "--" + suffix;
+    return;
+  }
+
+  const v = Number(value);
+  if (Number.isNaN(v)) {
+    display.textContent = "--" + suffix;
+    return;
+  }
+
+  const clamped = Math.min(Math.max(v, min), max);
+  const ratio   = (clamped - min) / (max - min); // 0..1
+  const angle   = -90 + ratio * 180;
+
+  const needle = document.getElementById(needleId);
+  if (needle) {
+    needle.setAttribute("transform", `rotate(${angle} 50 50)`);
+  }
+
+  display.textContent = v.toFixed(decimals) + suffix;
+}
+
+
+/* ======== Render panel JSON into UI ======== */
+function setRelayBadge(elId, isOn) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.classList.remove("on", "off");
+  if (isOn === null) {
+    el.textContent = "--";
+    return;
+  }
+  el.classList.add(isOn ? "on" : "off");
+  el.textContent = isOn ? "ON" : "OFF";
+}
+
+// Simple trend chart for pH (green) and TDS (blue) in an SVG
+// Simple trend chart for pH (green) and TDS (blue) in an SVG
+function renderTrendChart() {
+  const svg = document.getElementById("trendSvg");
+  if (!svg) return;
+
+  const phData  = history.ph;
+  const tdsData = history.tds;
+  const maxPoints = Math.max(phData.length, tdsData.length);
+  if (maxPoints < 2) {
+    svg.innerHTML = "";
+    return;
+  }
+
+  const width   = 220;
+  const height  = 100;
+  const padding = 8;
+
+  // Helpers to compute min/max safely
+  function getMinMax(data) {
+    const vals = data.filter(v => typeof v === "number" && !Number.isNaN(v));
+    if (!vals.length) return {min:0, max:1};
+    let min = Math.min(...vals);
+    let max = Math.max(...vals);
+    if (min === max) { min -= 1; max += 1; }
+    return {min, max};
+  }
+
+  const phMM  = getMinMax(phData);
+  const tdsMM = getMinMax(tdsData);
+
+  function buildPath(data, mm) {
+    const n = data.length;
+    if (n < 2) return "";
+    let d = "";
+    data.forEach((v, i) => {
+      const val = (typeof v === "number" && !Number.isNaN(v)) ? v : mm.min;
+      const x = padding + ((width - 2*padding) * (i / (n - 1)));
+      const ratio = (val - mm.min) / (mm.max - mm.min);
+      const y = height - padding - ratio * (height - 2*padding);
+      d += (i === 0 ? "M" : "L") + x + " " + y + " ";
+    });
+    return d;
+  }
+
+  const phPath  = buildPath(phData,  phMM);
+  const tdsPath = buildPath(tdsData, tdsMM);
+
+  svg.innerHTML = `
+    <line x1="${padding}" y1="${height-padding}" 
+          x2="${width-padding}" y2="${height-padding}" 
+          stroke="#cbd5f5" stroke-width="0.8"/>
+    <path d="${phPath}"  fill="none" stroke="#22c55e" stroke-width="1.4"/>
+    <path d="${tdsPath}" fill="none" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="3 3"/>
+  `;
+}
+
+
+function renderPanel(p) {
+  lastPanel = p;
+
+  // desired states
+  desired.auto     = bool(p.desired?.auto     ?? p.auto     ?? false);
+  desired.water    = bool(p.desired?.water    ?? p.water    ?? false);
+  desired.grow     = bool(p.desired?.grow     ?? p.grow     ?? false);
+  desired.solenoid = bool(p.desired?.solenoid ?? p.solenoid ?? false);
+  desired.mixer    = bool(p.desired?.mixer    ?? p.mixer    ?? false);
+
+  // Control tab switches
+  document.getElementById("autoToggle").checked     = desired.auto;
+  document.getElementById("waterToggle").checked    = desired.water;
+  document.getElementById("growToggle").checked     = desired.grow;
+  document.getElementById("solenoidToggle").checked = desired.solenoid;
+  document.getElementById("mixerToggle").checked    = desired.mixer;
+
+  // plant config
+  if (p.plant){
+    document.getElementById("plantName").value = p.plant.name      ?? "";
+    document.getElementById("ppmMin").value    = p.plant.ppm_min   ?? "";
+    document.getElementById("ppmMax").value    = p.plant.ppm_max   ?? "";
+    document.getElementById("phTarget").value  = p.plant.ph_target ?? "";
+    document.getElementById("phMin").value     = p.plant.ph_min    ?? "";
+    document.getElementById("phMax").value     = p.plant.ph_max    ?? "";
+    document.getElementById("onH").value       = p.plant.on_h      ?? "";
+    document.getElementById("onM").value       = p.plant.on_m      ?? "";
+    document.getElementById("offH").value      = p.plant.off_h     ?? "";
+    document.getElementById("offM").value      = p.plant.off_m     ?? "";
+  }
+
+  // live sensor
+  /*
+  if (p.latest_sensor){
+    const s = p.latest_sensor;
+
+    // Live Status (side card)
+    document.getElementById("lsPh").textContent    = s.ph         ?? "-";
+    document.getElementById("lsTds").textContent   = s.tds        ?? "-";
+    document.getElementById("lsWater").textContent = s.water_temp ?? "-";
+    document.getElementById("lsAir").textContent   = s.air_temp   ?? "-";
+    document.getElementById("lsHum").textContent   = s.humidity   ?? "-";
+
+    // Dashboard gauges
+    setGauge(s.ph,          4,   8,   "phNeedle",        "phValue",        2,   "");
+    setGauge(s.tds,         0,   1500,"tdsNeedle",       "tdsValue",       0,   "");
+    setGauge(s.water_temp,  10,  40,  "waterTempNeedle", "waterTempValue", 1,   "°C");
+    setGauge(s.water_level, 0,   100, "waterLevelNeedle","waterLevelValue",0,   "%");
+*/
+
+    if (p.latest_sensor){
+  const s = p.latest_sensor;
+
+  // Live Status (side card)
+  document.getElementById("lsPh").textContent    = s.ph         ?? "-";
+  document.getElementById("lsTds").textContent   = s.tds        ?? "-";
+  document.getElementById("lsWater").textContent = s.water_temp ?? "-";
+  document.getElementById("lsAir").textContent   = s.air_temp   ?? "-";
+  document.getElementById("lsHum").textContent   = s.humidity   ?? "-";
+
+  // NEW: drum values in Live Status
+  const depthEl  = document.getElementById("lsDepth");
+  const distEl   = document.getElementById("lsDrumD");
+  const literEl  = document.getElementById("lsLiters");
+  if (depthEl) depthEl.textContent = s.drumDepth  ?? "-";
+  if (distEl)  distEl.textContent  = s.drumD      ?? "-";
+  if (literEl) literEl.textContent = s.drumLiters ?? "-";
+
+  // Dashboard gauges
+  setGauge(s.ph,          4,   8,   "phNeedle",        "phValue",        2,   "");
+  setGauge(s.tds,         0,   1500,"tdsNeedle",       "tdsValue",       0,   "");
+  setGauge(s.water_temp,  10,  40,  "waterTempNeedle", "waterTempValue", 1,   "°C");
+
+  // Water level gauge now uses drumLiters (0–100L example; adjust max sa capacity mo)
+  setGauge(s.drumLiters,  0,   100, "waterLevelNeedle","waterLevelValue",1,   " L");
+
+
+    const humEl = document.getElementById("humidityValue");
+    if (humEl) humEl.textContent = (s.humidity ?? "--") + "%";
+
+    const airEl = document.getElementById("airTempValue");
+    if (airEl) airEl.textContent = (s.air_temp ?? "--") + "°C";
+
+    // update in-memory history for trend chart
+    if (typeof s.ph === "number")  history.ph.push(s.ph);
+    if (typeof s.tds === "number") history.tds.push(s.tds);
+    if (history.ph.length  > 20) history.ph  = history.ph.slice(-20);
+    if (history.tds.length > 20) history.tds = history.tds.slice(-20);
+    renderTrendChart();
+  }
+
+  // actual relay states (from device)
+  const a = p.actual || {};
+  const waterOn    = bool(a.water);
+  const growOn     = bool(a.grow);
+  const solenoidOn = bool(a.solenoid);
+  const mixerOn    = bool(a.mixer);
+
+  // Control tab
+  document.getElementById("actWater").textContent = onOff(waterOn);
+  document.getElementById("actGrow").textContent  = onOff(growOn);
+  document.getElementById("actSol").textContent   = onOff(solenoidOn);
+  document.getElementById("actMixer").textContent = onOff(mixerOn);
+  document.getElementById("ackRev").textContent   = a.ack_rev  ?? "-";
+  document.getElementById("ackDose").textContent  = a.dose_ack ?? "-";
+
+  // Dashboard relay card (badges)
+  setRelayBadge("dashAutoState",     desired.auto);
+  setRelayBadge("dashWaterState",    waterOn);
+  setRelayBadge("dashGrowState",     growOn);
+  setRelayBadge("dashSolenoidState", solenoidOn);
+  setRelayBadge("dashMixerState",    mixerOn);
+}
+
+/* ======== API Webhooks tab binding ======== */
+function bindWebhookTester() {
+  const devIdInput    = document.getElementById("devIdInput");
+  const devCodeInput  = document.getElementById("devCodeInput");
+  const devStatus     = document.getElementById("devStatus");
+  const panelOutput   = document.getElementById("panelOutput");
+  const deviceListEl  = document.getElementById("deviceList");
+  const activeSelect  = document.getElementById("activeDeviceSelect");
+  const activeInfo    = document.getElementById("activeDeviceInfo");
+  const headerSelect  = document.getElementById("headerDeviceSelect");
+  const testerLabel   = document.getElementById("testerDeviceLabel");
+  const btnRefresh    = document.getElementById("btnRefreshDevices");
+  const dataBody      = document.getElementById("deviceDataBody");
+
+  if (!devIdInput) return; // tab not present
+
+  // All devices tied to this account (from device_admin.php)
+  let devices = [];
+
+  /* --- Helper: render recent sensor data table (last 5 rows) --- */
+  async function refreshDeviceData() {
+    if (!dataBody || !devices.length) {
+      if (dataBody) {
+        dataBody.innerHTML = `
+          <tr>
+            <td colspan="8" style="padding:8px;text-align:center;font-size:12px;opacity:.7;">
+              No devices or data yet.
+            </td>
+          </tr>`;
+      }
+      return;
+    }
+
+    dataBody.innerHTML = `
+      <tr>
+        <td colspan="8" style="padding:8px;text-align:center;font-size:12px;opacity:.7;">
+          Loading data...
+        </td>
+      </tr>`;
+
+    const rows = [];
+
+    // For each device, ask webhook.php for last N logs
+    for (const d of devices) {
+      try {
+        const url = `${API_BASE}?cmd=history`
+                   + `&device_id=${encodeURIComponent(d.device_id)}`
+                   + `&device_code=${encodeURIComponent(d.device_code)}`
+                   + `&limit=5`;
+        const res  = await fetch(url);
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          data.forEach(log => {
+            rows.push({
+              device_id:   d.device_id,
+              ts:          log.timestamp || log.logged_at || "",
+              ph:          log.ph,
+              tds:         log.tds ?? log.ppm,
+              water_temp:  log.water_temp,
+              water_level: log.water_level,
+              humidity:    log.humidity,
+              air_temp:    log.air_temp,
+              relay:       log.relay_status || log.relays || "-"
+            });
+          });
+        }
+      } catch (e) {
+        console.error("history error for", d.device_id, e);
+      }
+    }
+
+    // Sort by newest timestamp (string compare ok if ISO format)
+    rows.sort((a, b) => (b.ts || "").localeCompare(a.ts || ""));
+    const top = rows.slice(0, 5);
+
+    if (!top.length) {
+      dataBody.innerHTML = `
+        <tr>
+          <td colspan="8" style="padding:8px;text-align:center;font-size:12px;opacity:.7;">
+            No sensor data yet.
+          </td>
+        </tr>`;
+      return;
+    }
+
+    dataBody.innerHTML = top.map(r => `
+      <tr>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.device_id}</td>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.ts || "-"}</td>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.ph ?? "--"} / ${r.tds ?? "--"}</td>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.water_temp ?? "--"}</td>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.water_level ?? "--"}</td>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.humidity ?? "--"}</td>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.air_temp ?? "--"}</td>
+        <td style="padding:6px;border:1px solid #e5e7eb;">${r.relay}</td>
+      </tr>
+    `).join("");
+  }
+
+  /* --- Helper: set active device (for dashboard + tester) --- */
+  function setActiveDevice(id, code) {
+    if (!id || !code) return;
+
+    CURRENT_DEVICE_ID   = id;
+    CURRENT_DEVICE_CODE = code;
+    localStorage.setItem("shvf_device_id", id);
+    localStorage.setItem("shvf_device_code", code);
+
+    // Fill dropdowns from devices
+    const optionsHtml = devices.map(d => {
+      const sel = d.device_id === id ? " selected" : "";
+      return `<option value="${d.device_id}"${sel}>${d.device_id}</option>`;
+    }).join("");
+
+    if (activeSelect) activeSelect.innerHTML = optionsHtml;
+    if (headerSelect) headerSelect.innerHTML = optionsHtml;
+
+    // Active device info box
+    const row  = devices.find(d => d.device_id === id);
+    const dbid = row && row.id ? row.id : "?";
+    if (activeInfo) {
+      activeInfo.textContent = `ID: ${id} • Code: ${code} • DB id: ${dbid}`;
+    }
+
+    if (testerLabel) testerLabel.textContent = id || "no device selected";
+
+    // Highlight active in list
+    if (deviceListEl) {
+      [...deviceListEl.querySelectorAll(".device-row")].forEach(item => {
+        item.classList.toggle("active", item.dataset.deviceId === id);
+      });
+    }
+
+    // Refresh main dashboard for this device
+    pollPanel();
+  }
+
+  if (activeSelect) {
+    activeSelect.onchange = () => {
+      const id  = activeSelect.value;
+      const row = devices.find(d => d.device_id === id);
+      if (!row) return;
+      setActiveDevice(row.device_id, row.device_code);
+    };
+  }
+
+  if (headerSelect) {
+    headerSelect.onchange = () => {
+      const id  = headerSelect.value;
+      const row = devices.find(d => d.device_id === id);
+      if (!row) return;
+      setActiveDevice(row.device_id, row.device_code);
+      if (devStatus) devStatus.textContent = `Dashboard now using device ${id}.`;
+    };
+  }
+
+  /* --- Load devices from DB and build list + selects --- */
+  async function loadDevices() {
+    if (!deviceListEl) return;
+    deviceListEl.innerHTML = "<div style='font-size:12px;opacity:.7;'>Loading...</div>";
+
+    try {
+      const res  = await fetch("api/device_admin.php", {
+  headers: {
+    "Authorization": "Bearer " + getJwt()
+  }
+});
+
+      const data = await res.json();
+
+      // EXPECT: device_admin.php GET returns pure array:
+      // [ { id, device_id, device_code, commands_rev, last_seen }, ... ]
+      if (!Array.isArray(data)) {
+        deviceListEl.innerHTML = "<div style='font-size:12px;color:#b91c1c;'>Invalid response from server.</div>";
+        return;
+      }
+
+      devices = data;
+
+      if (!devices.length) {
+        deviceListEl.innerHTML = "<div style='font-size:12px;opacity:.7;'>No devices yet. Add one above.</div>";
+        if (activeSelect) activeSelect.innerHTML = "";
+        if (headerSelect) headerSelect.innerHTML = "";
+        await refreshDeviceData();
+        return;
+      }
+
+      // Render device list with "Set active" + "Remove"
+      deviceListEl.innerHTML = devices.map(d => `
+        <div class="device-row" data-device-id="${d.device_id}" data-device-code="${d.device_code}">
+          <div>
+            <strong>${d.device_id}</strong>
+            <small>Code: ${d.device_code} • DB id: ${d.id}</small>
+            ${d.last_seen ? `<small>Last seen: ${d.last_seen}</small>` : ""}
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="btn-ghost btn-sm js-set-active">Set active</button>
+            <button type="button" class="btn-ghost btn-sm js-delete-device" style="color:#b91c1c;border-color:#fecaca;">
+              Remove
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      // Attach events
+      [...deviceListEl.querySelectorAll(".device-row")].forEach(rowEl => {
+        const id   = rowEl.dataset.deviceId;
+        const code = rowEl.dataset.deviceCode;
+
+        // Clicking row also sets active
+        rowEl.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setActiveDevice(id, code);
+        });
+
+        const btnSet = rowEl.querySelector(".js-set-active");
+        if (btnSet) {
+          btnSet.addEventListener("click", (e) => {
+            e.stopPropagation();
+            setActiveDevice(id, code);
+          });
+        }
+
+        const btnDel = rowEl.querySelector(".js-delete-device");
+        if (btnDel) {
+          btnDel.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (!confirm(`Remove device "${id}"?`)) return;
+            try {
+              const res = await fetch("api/device_admin.php", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type":"application/json",
+                    "Authorization":"Bearer " + getJwt()
+                  },
+                  body: JSON.stringify({ action:"delete", device_id:id })
+                });
+
+              const out = await res.json();
+              devStatus.textContent = out.message || "Device removed.";
+              await loadDevices();
+            } catch (err) {
+              devStatus.textContent = "Error deleting device: " + err.message;
+            }
+          });
+        }
+      });
+
+      // Pick default active device:
+      // 1) saved in localStorage (if still exists)
+      // 2) else latest (highest id)
+      let targetId   = localStorage.getItem("shvf_device_id");
+      let targetCode = localStorage.getItem("shvf_device_code");
+      const found    = devices.find(d => d.device_id === targetId);
+
+      if (!found) {
+        const sorted = [...devices].sort((a, b) => (a.id || 0) - (b.id || 0));
+        const latest = sorted[sorted.length - 1];
+        targetId   = latest.device_id;
+        targetCode = latest.device_code;
+      } else {
+        targetCode = found.device_code;
+      }
+
+      setActiveDevice(targetId, targetCode);
+      await refreshDeviceData();
+
+    } catch (err) {
+      console.error("loadDevices error:", err);
+      deviceListEl.innerHTML = "<div style='font-size:12px;color:#b91c1c;'>Error loading devices.</div>";
+      if (dataBody) {
+        dataBody.innerHTML = `
+          <tr><td colspan="8" style="padding:8px;text-align:center;font-size:12px;opacity:.7;">
+            Cannot load sensor data because devices failed to load.
+          </td></tr>`;
+      }
+    }
+  }
+
+  if (btnRefresh) btnRefresh.onclick = loadDevices;
+
+
+document.getElementById("btnCreateDevice").onclick = async () => {
+  const id   = devIdInput.value.trim();
+  const code = devCodeInput.value.trim();
+
+  if (!id || !code) {
+    devStatus.textContent = "Please enter both Device ID and Device Code.";
+    return;
+  }
+
+  devStatus.textContent = "Saving device...";
+  try {
+    const res  = await fetch("api/device_admin.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + getJwt()
+      },
+      body: JSON.stringify({ action: "create", device_id: id, device_code: code })
+    });
+
+    const text = await res.text();   // read raw body
+
+    if (!res.ok) {
+      devStatus.textContent = `Server error ${res.status}: ${text || "(no body)"}`;
+      return;
+    }
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      devStatus.textContent = "Server returned invalid JSON: " + text;
+      return;
+    }
+
+    devStatus.textContent = data.message || "Device saved.";
+    devIdInput.value   = "";
+    devCodeInput.value = "";
+
+    await loadDevices();   // refresh list + dropdowns
+  } catch (e) {
+    devStatus.textContent = "Error creating device: " + e.message;
+  }
+};
+
+
+
+  /* --- Tester buttons (use CURRENT_DEVICE_*) --- */
+  document.getElementById("btnTestPanel").onclick = async () => {
+    panelOutput.textContent = "Loading...";
+    try {
+      const url = `${API_BASE}?cmd=panel`
+                + `&device_id=${encodeURIComponent(CURRENT_DEVICE_ID)}`
+                + `&device_code=${encodeURIComponent(CURRENT_DEVICE_CODE)}`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      panelOutput.textContent = JSON.stringify(data, null, 2);
+    } catch(e) {
+      panelOutput.textContent = "Error: " + e.message;
+    }
+  };
+
+  document.getElementById("btnSendDummy").onclick = async () => {
+    panelOutput.textContent = "Sending dummy sensor data...";
+    try {
+      const now = new Date();
+      const payload = {
+        device_id:   CURRENT_DEVICE_ID,
+        device_code: CURRENT_DEVICE_CODE,
+        plant:       "test",
+        ph:          6.1,
+        ppm:         650,
+        waterTemp:   23.4,
+        temp:        30.2,
+        humidity:    70.1,
+        drumD:       12.3,   // cm distance sensor→water
+        drumDepth:   37.7,   // cm water depth
+        drumLiters:  45.8,   // liters (example value)
+        hour:   now.getHours(),
+        minute: now.getMinutes(),
+        second: now.getSeconds()
+      };
+      const res  = await fetch(API_BASE, {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      panelOutput.textContent = JSON.stringify(data, null, 2);
+    } catch(e) {
+      panelOutput.textContent = "Error: " + e.message;
+    }
+  };
+
+  // Initial load
+  loadDevices();
+}
+
+
+/* ======== Poll loop ======== */
+async function pollPanel() {
+  try {
+    const p = await apiPanel();
+    renderPanel(p);
+  } catch(e) {
+    console.error("Error getting panel:", e);
+  }
+}
+
+/* ======== Init ======== */
+loadActiveDevice();
+bindControls();
+bindWebhookTester();
+pollPanel();
+setInterval(pollPanel, 3000);
+</script>
+
+</body>
+
+</html>

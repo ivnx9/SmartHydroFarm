@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Confirm OTP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap" >
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
+      --accent: #00ff8c;
+      --accent2: #00ccff;
+      --text: #e4e4e4;
+      --error: #ff3860;
+      --radius: 12px;
+      --shadow: 0 8px 24px rgba(0, 255, 140, .15);
+      --trans: .3s ease;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Exo 2', sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .otp-container {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 30px 35px;
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--accent);
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 255, 140, .2);
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #000;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--trans);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    #response {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--error);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="otp-container">
+  <h2>Confirm OTP</h2>
+  <form id="otpForm">
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="otp">Enter OTP sent to your email:</label>
+    <input type="text" id="otp" name="otp">
+
+    <button type="button" id="sendOTPBtn">Send OTP</button><br/><br/>
+    <button type="submit" id="verifyBtn">Verify</button>
+  </form>
+  <p id="response"></p>
+</div>
+  
+  <script>
+    /* Redirect if already logged in */
+    if(localStorage.getItem('jwt_token')) location.href='dashboard.html';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+  const emailParam = urlParams.get("email");
+  const userIDParam = urlParams.get("user_id");
+  const userName = urlParams.get("username");
+  const emailInput = document.getElementById("email");
+  const responseBox = document.getElementById("response");
+  const sendOTPBtn = document.getElementById("sendOTPBtn");
+
+  if (emailParam && userIDParam && userName) {
+    emailInput.value = emailParam;
+    emailInput.readOnly = true;
+  }
+
+  let otpCooldown = false;
+  sendOTPBtn.addEventListener("click", function () {
+    responseBox.textContent = "";
+    if (otpCooldown) return;
+
+    const email = emailInput.value.trim();
+    if (!email) {
+      responseBox.textContent = "Email is required.";
+      responseBox.style.color = "red";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("action", "send");
+
+    fetch("https://api.smarthydrofarm.com/mail.php", {
+      method: "POST",
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        responseBox.textContent = data.message;
+        responseBox.style.color = data.status === "success" ? "#00ff8c" : "red";
+        if (data.status === "success") {
+          otpCooldown = true;
+          sendOTPBtn.disabled = true;
+          let remaining = 300;
+          const countdown = setInterval(() => {
+            sendOTPBtn.textContent = `Resend in ${remaining}s`;
+            remaining--;
+            if (remaining < 0) {
+              clearInterval(countdown);
+              otpCooldown = false;
+              sendOTPBtn.disabled = false;
+              sendOTPBtn.textContent = "Send OTP";
+            }
+          }, 1000);
+        }
+      })
+      .catch(() => {
+        responseBox.textContent = "Failed to send OTP.";
+        responseBox.style.color = "red";
+      });
+  });
+
+  document.getElementById("otpForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    responseBox.textContent = "";
+    const email = emailInput.value.trim();
+    const otp = document.getElementById("otp").value.trim();
+
+    if (!email && !otp) {
+      responseBox.textContent = "Email and OTP are required.";
+      responseBox.style.color = "red";
+      return;
+    } else if(!email) {
+      responseBox.textContent = "Email are required.";
+      responseBox.style.color = "red";
+      return;
+    } else if(!otp) {
+      responseBox.textContent = "OTP are required.";
+      responseBox.style.color = "red";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("action", "verify");
+    formData.append("email", email);
+    formData.append("otp", otp);
+    formData.append("user_id", userIDParam);
+    formData.append("username", userName);
+
+    fetch("https://api.smarthydrofarm.com/mail.php", {
+      method: "POST",
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        responseBox.textContent = data.message;
+        responseBox.style.color = data.status === "success" ? "#00ff8c" : "red";
+        if (data.status === "success") {
+          setTimeout(() => {
+            localStorage.setItem('jwt_token',data.token);
+            window.location.href = "dashboard.html";
+          }, 1500);
+        }
+      })
+      .catch(() => {
+        responseBox.textContent = "Verification failed";
+        responseBox.style.color = "red";
+      });
+  });
+
+    
+  </script>
+</body>
+</html>

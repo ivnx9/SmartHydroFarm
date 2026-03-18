@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SmartHydroFarm | Internet Speed Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --shf-bg: #020617;
+      --shf-card: #020617;
+      --shf-card-soft: #0b1120;
+      --shf-primary: #22c55e;
+      --shf-primary-soft: rgba(34,197,94,0.18);
+      --shf-primary-strong: #16a34a;
+      --shf-text-main: #e5e7eb;
+      --shf-text-muted: #9ca3af;
+      --shf-border: #1f2937;
+      --shf-danger: #ef4444;
+      --shf-radius-lg: 20px;
+      --shadow-soft: 0 18px 40px rgba(0,0,0,0.45);
+      --transition-fast: 0.2s ease;
+      --transition-med: 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,0.25), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(34,197,94,0.18), transparent 55%),
+        linear-gradient(135deg, #020617, #020617);
+      color: var(--shf-text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .shf-card {
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.17), transparent 55%),
+                  var(--shf-card);
+      border-radius: 24px;
+      border: 1px solid rgba(148,163,184,0.2);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 22px 20px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shf-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 120% 0%, rgba(34,197,94,0.3), transparent 55%),
+        radial-gradient(circle at 0% 130%, rgba(21,128,61,0.35), transparent 60%);
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      column-gap: 16px;
+      row-gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 30% 0%, #4ade80, #16a34a 55%, #052e16 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ecfdf5;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: 0.04em;
+      box-shadow: 0 0 22px rgba(34,197,94,0.55);
+    }
+
+    .brand-text h1 {
+      font-size: 18px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #f9fafb;
+    }
+
+    .brand-text span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--shf-text-muted);
+    }
+
+    .brand-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(34,197,94,0.12);
+      color: #bbf7d0;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border: 1px solid rgba(22,163,74,0.65);
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .status-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid var(--shf-border);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--shf-text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--shf-primary);
+      box-shadow: 0 0 10px rgba(34,197,94,0.7);
+    }
+
+    .status-pill span {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .server-label {
+      font-size: 11px;
+      color: var(--shf-text-muted);
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .server-url {
+      font-size: 11px;
+      color: #a5f3fc;
+      word-break: break-all;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .header {
+        align-items: flex-start;
+      }
+
+      .header-right {
+        align-items: flex-start;
+      }
+    }
+
+    .main-panel {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.8), rgba(15,23,42,0.98));
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.25);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% -20%, rgba(34,197,94,0.35), transparent 60%);
+      opacity: 0.12;
+      z-index: -1;
+    }
+
+    .main-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .main-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .main-subtitle {
+      font-size: 12px;
+      color: var(--shf-text-muted);
+    }
+
+    .tag-chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      font-size: 11px;
+      color: var(--shf-text-muted);
+    }
+
+    .speed-circle-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-block: 6px 8px;
+      gap: 2px;
+    }
+
+    .speed-circle {
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(34,197,94,0.4), transparent 65%),
+        radial-gradient(circle at 0% 100%, rgba(22,101,52,0.4), #020617);
+      border: 2px solid rgba(34,197,94,0.4);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 60px rgba(34,197,94,0.25),
+        inset 0 0 25px rgba(15,23,42,0.95);
+    }
+
+    .speed-circle-inner {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: radial-gradient(circle, rgba(15,23,42,0.95), #020617);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .speed-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--shf-text-muted);
+    }
+
+    .speed-value {
+      font-size: 40px;
+      font-weight: 700;
+      color: #f9fafb;
+      line-height: 1;
+    }
+
+    .speed-unit {
+      font-size: 13px;
+      color: var(--shf-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .speed-ring {
+      position: absolute;
+      inset: 14px;
+      border-radius: 50%;
+      border: 3px dashed rgba(55,65,81,0.9);
+      mask-image: radial-gradient(circle at center, black 60%, transparent 63%);
+    }
+
+    .speed-ring-progress {
+      position: absolute;
+      inset: 14px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: rgba(34,197,94,0.9);
+      border-right-color: rgba(34,197,94,0.7);
+      filter: drop-shadow(0 0 12px rgba(34,197,94,0.75));
+      transform-origin: center;
+      transform: rotate(0deg);
+      transition: transform 0.18s linear;
+      mask-image: radial-gradient(circle at center, black 60%, transparent 63%);
+    }
+
+    .speed-phase {
+      font-size: 12px;
+      color: var(--shf-text-muted);
+      margin-top: 8px;
+      text-align: center;
+      min-height: 1.2em;
+    }
+
+    .controls {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      padding: 10px 26px;
+      border-radius: 999px;
+      border: none;
+      background: radial-gradient(circle at 10% 0%, #bbf7d0, #22c55e 50%, #15803d 100%);
+      color: #022c22;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow:
+        0 0 25px rgba(34,197,94,0.7),
+        0 12px 30px rgba(15,23,42,0.9);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast), opacity var(--transition-fast);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: default;
+      box-shadow: 0 8px 18px rgba(15,23,42,0.9);
+      filter: grayscale(0.15);
+    }
+
+    .btn-primary:not(:disabled):hover {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow:
+        0 0 30px rgba(34,197,94,0.85),
+        0 14px 32px rgba(15,23,42,0.95);
+    }
+
+    .btn-primary .dot-pulse {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(6,95,70,1);
+      box-shadow: 0 0 12px rgba(22,163,74,0.8);
+      position: relative;
+      overflow: visible;
+    }
+
+    .btn-primary[data-loading="true"] .dot-pulse::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(34,197,94,0.6);
+      animation: pulse 1.5s infinite ease-out;
+    }
+
+    .btn-primary[data-loading="false"] .dot-pulse::after {
+      display: none;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    .small-note {
+      font-size: 11px;
+      color: var(--shf-text-muted);
+      text-align: center;
+      max-width: 260px;
+    }
+
+    .small-note span {
+      color: #bbf7d0;
+    }
+
+    .side-panel {
+      background: radial-gradient(circle at top right, rgba(34,197,94,0.2), rgba(15,23,42,0.97));
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.25);
+      padding: 16px 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .side-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .side-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .side-sub {
+      font-size: 11px;
+      color: var(--shf-text-muted);
+    }
+
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(55,65,81,0.9);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--shf-text-muted);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .metric-card {
+      background: rgba(15,23,42,0.9);
+      border-radius: 14px;
+      border: 1px solid rgba(55,65,81,0.9);
+      padding: 10px 9px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 72px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--shf-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #f9fafb;
+      line-height: 1;
+    }
+
+    .metric-unit {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--shf-text-muted);
+    }
+
+    .metric-tag {
+      font-size: 10px;
+      color: #a3e635;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .metric-tag.bad {
+      color: #fecaca;
+    }
+
+    .progress-wrap {
+      margin-top: 8px;
+    }
+
+    .progress-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--shf-text-muted);
+      margin-bottom: 4px;
+    }
+
+    .progress-bar-outer {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(31,41,55,1);
+      overflow: hidden;
+    }
+
+    .progress-bar-inner {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+      box-shadow: 0 0 10px rgba(34,197,94,0.7);
+      transition: width 0.2s ease-out;
+    }
+
+    .info-panel {
+      margin-top: 4px;
+      padding: 8px 9px;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.95);
+      border: 1px dashed rgba(75,85,99,0.75);
+      font-size: 11px;
+      color: var(--shf-text-muted);
+      line-height: 1.5;
+    }
+
+    .info-panel strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .foot-note {
+      margin-top: 8px;
+      font-size: 10px;
+      color: var(--shf-text-muted);
+    }
+
+    .error {
+      color: var(--shf-danger);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="shf-card">
+      <header class="header">
+        <div class="brand">
+          <div class="brand-logo">SH</div>
+          <div class="brand-text">
+            <h1>SmartHydroFarm</h1>
+            <span>
+              Network performance monitor
+              <span class="brand-badge">Speed Test</span>
+            </span>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="status-pill" id="status-pill">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Idle · Ready to test</span>
+          </div>
+          <div class="server-label">
+            Server:
+            <span class="server-url" id="server-url">https://your-api.smartydrofarm.com</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid">
+        <!-- LEFT: MAIN PANEL -->
+        <section class="main-panel">
+          <div class="main-top">
+            <div>
+              <div class="main-title">
+                Internet Speed Test
+              </div>
+              <div class="main-subtitle">
+                Measure the connection between this device and your SmartHydroFarm server.
+              </div>
+            </div>
+            <div class="tag-chip">
+              Local network · Wi-Fi / Ethernet
+            </div>
+          </div>
+
+          <div class="speed-circle-wrapper">
+            <div class="speed-circle">
+              <div class="speed-ring"></div>
+              <div class="speed-ring-progress" id="speed-ring-progress"></div>
+              <div class="speed-circle-inner">
+                <div class="speed-label" id="speed-label">Download</div>
+                <div class="speed-value" id="speed-value">0.00</div>
+                <div class="speed-unit" id="speed-unit">Mbps</div>
+              </div>
+            </div>
+            <p class="speed-phase" id="speed-phase">Press start to begin.</p>
+          </div>
+
+          <div class="controls">
+            <button class="btn-primary" id="start-btn" data-loading="false">
+              <span class="dot-pulse"></span>
+              <span id="start-btn-label">Start Test</span>
+            </button>
+            <p class="small-note">
+              This tool only measures the connection between <span>your browser</span> and
+              <span>your SmartHydroFarm server</span>.
+            </p>
+          </div>
+        </section>
+
+        <!-- RIGHT: SIDE PANEL -->
+        <aside class="side-panel">
+          <div class="side-header">
+            <div>
+              <div class="side-title">Connection summary</div>
+              <div class="side-sub">Approximate values for this device.</div>
+            </div>
+            <div class="pill-group">
+              <span class="pill">Realtime</span>
+              <span class="pill">SmartHydroFarm</span>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">Download</div>
+              <div class="metric-value" id="metric-download">0.00</div>
+              <div class="metric-unit">Mbps</div>
+              <div class="metric-tag" id="metric-download-tag">–</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Upload</div>
+              <div class="metric-value" id="metric-upload">0.00</div>
+              <div class="metric-unit">Mbps</div>
+              <div class="metric-tag" id="metric-upload-tag">–</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Latency</div>
+              <div class="metric-value" id="metric-ping">0</div>
+              <div class="metric-unit">ms</div>
+              <div class="metric-tag" id="metric-ping-tag">–</div>
+            </div>
+          </div>
+
+          <div class="progress-wrap">
+            <div class="progress-label-row">
+              <span>Test progress</span>
+              <span id="progress-label">0%</span>
+            </div>
+            <div class="progress-bar-outer">
+              <div class="progress-bar-inner" id="progress-bar"></div>
+            </div>
+          </div>
+
+          <div class="info-panel" id="info-panel">
+            <strong>How it works</strong><br>
+            • <strong>Download</strong> downloads a file from your server.<br>
+            • <strong>Upload</strong> sends data to your server.<br>
+            • <strong>Latency</strong> measures the round-trip time to your server.<br><br>
+            For accurate results, connect to the same network as your SmartHydroFarm controller.
+          </div>
+
+          <div class="foot-note" id="error-box"></div>
+        </aside>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // ========= CONFIG =========
+    // Replace these URLs with your real endpoints on smarthydrofarm.com:
+    const SPEEDTEST_CONFIG = {
+      serverBaseUrl: "https://smarthydrofarm.com",
+      downloadUrl:   "https://smarthydrofarm.com/api/speedtest/download.php?size=5mb",
+      uploadUrl:     "https://smarthydrofarm.com/api/speedtest/upload.php",
+      pingUrl:       "https://smarthydrofarm.com/api/speedtest/ping.php",
+      downloadIterations: 3,
+      uploadIterations: 3,
+      pingIterations: 5,
+      uploadSizeBytes: 2 * 1024 * 1024 // 2 MB
+    };
+
+    // ========= HELPERS =========
+    function formatMbps(bitsPerSecond) {
+      const Mbps = bitsPerSecond / 1_000_000;
+      return Mbps.toFixed(2);
+    }
+
+    function clamp(val, min, max) {
+      return Math.min(max, Math.max(min, val));
+    }
+
+    function updateStatus(text, isTesting) {
+      const statusText = document.getElementById("status-text");
+      const dot = document.getElementById("status-dot");
+      statusText.textContent = text;
+
+      if (isTesting) {
+        dot.style.background = "var(--shf-primary)";
+        dot.style.boxShadow = "0 0 12px rgba(34,197,94,0.8)";
+      } else {
+        dot.style.background = "#6b7280";
+        dot.style.boxShadow = "none";
+      }
+    }
+
+    function setProgress(percent) {
+      const bar = document.getElementById("progress-bar");
+      const label = document.getElementById("progress-label");
+      const clamped = clamp(percent, 0, 100);
+      bar.style.width = clamped + "%";
+      label.textContent = clamped.toFixed(0) + "%";
+    }
+
+    function setRingRotation(percent) {
+      const ring = document.getElementById("speed-ring-progress");
+      const deg = (clamp(percent, 0, 100) / 100) * 340 + 10;
+      ring.style.transform = "rotate(" + deg + "deg)";
+    }
+
+    function setPhase(label, value, unit, phaseText) {
+      document.getElementById("speed-label").textContent = label;
+      document.getElementById("speed-value").textContent = value;
+      document.getElementById("speed-unit").textContent = unit;
+      document.getElementById("speed-phase").textContent = phaseText;
+    }
+
+    function setError(message) {
+      const box = document.getElementById("error-box");
+      if (!message) {
+        box.textContent = "";
+        box.classList.remove("error");
+        return;
+      }
+      box.textContent = message;
+      box.classList.add("error");
+    }
+
+    function rateDownload(mbps) {
+      if (mbps >= 50) return "Excellent";
+      if (mbps >= 20) return "Good";
+      if (mbps >= 10) return "Fair";
+      return "Slow";
+    }
+
+    function rateUpload(mbps) {
+      if (mbps >= 20) return "Excellent";
+      if (mbps >= 10) return "Good";
+      if (mbps >= 5)  return "Fair";
+      return "Slow";
+    }
+
+    function ratePing(ms) {
+      if (ms <= 30) return "Excellent";
+      if (ms <= 60) return "Good";
+      if (ms <= 100) return "Fair";
+      return "High";
+    }
+
+    // ========= SPEED MEASUREMENT =========
+    async function measureDownloadOnce() {
+      const url = SPEEDTEST_CONFIG.downloadUrl + "&_t=" + Math.random();
+      const start = performance.now();
+      const response = await fetch(url, { cache: "no-store", mode: "cors" });
+      const reader = response.body.getReader();
+      let bytes = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+      }
+
+      const end = performance.now();
+      const seconds = (end - start) / 1000;
+      const bits = bytes * 8;
+      const bps = bits / seconds;
+      return bps;
+    }
+
+    async function measureUploadOnce() {
+      const url = SPEEDTEST_CONFIG.uploadUrl + "?_t=" + Math.random();
+      const size = SPEEDTEST_CONFIG.uploadSizeBytes;
+
+      // Fill with dummy data
+      const buffer = new Uint8Array(size);
+      for (let i = 0; i < size; i++) buffer[i] = 0xff * Math.random();
+
+      const start = performance.now();
+      const response = await fetch(url, {
+        method: "POST",
+        body: buffer,
+        mode: "cors",
+      });
+      await response.text().catch(() => {});
+      const end = performance.now();
+
+      const seconds = (end - start) / 1000;
+      const bits = size * 8;
+      const bps = bits / seconds;
+      return bps;
+    }
+
+    async function measurePingOnce() {
+      const url = SPEEDTEST_CONFIG.pingUrl + "?_t=" + Math.random();
+      const start = performance.now();
+      await fetch(url, { method: "GET", cache: "no-store", mode: "cors" });
+      const end = performance.now();
+      return end - start;
+    }
+
+    async function runSpeedTest() {
+      const startBtn = document.getElementById("start-btn");
+      const startLabel = document.getElementById("start-btn-label");
+
+      startBtn.disabled = true;
+      startBtn.dataset.loading = "true";
+      startLabel.textContent = "Testing...";
+      setError("");
+      setProgress(0);
+      setRingRotation(0);
+      updateStatus("Testing connection…", true);
+
+      // Reset metrics
+      document.getElementById("metric-download").textContent = "0.00";
+      document.getElementById("metric-upload").textContent = "0.00";
+      document.getElementById("metric-ping").textContent = "0";
+      document.getElementById("metric-download-tag").textContent = "–";
+      document.getElementById("metric-upload-tag").textContent = "–";
+      document.getElementById("metric-ping-tag").textContent = "–";
+
+      try {
+        // ---- DOWNLOAD ----
+        setPhase("Download", "0.00", "Mbps", "Measuring download from SmartHydroFarm…");
+        let downloadResults = [];
+        for (let i = 0; i < SPEEDTEST_CONFIG.downloadIterations; i++) {
+          setProgress((i / (SPEEDTEST_CONFIG.downloadIterations + SPEEDTEST_CONFIG.uploadIterations + 1)) * 100);
+          setRingRotation((i / (SPEEDTEST_CONFIG.downloadIterations + SPEEDTEST_CONFIG.uploadIterations + 1)) * 100);
+          const bps = await measureDownloadOnce();
+          downloadResults.push(bps);
+
+          const currentMbps = formatMbps(bps);
+          setPhase("Download", currentMbps, "Mbps", `Download test ${i + 1} of ${SPEEDTEST_CONFIG.downloadIterations}`);
+        }
+
+        const avgDownloadBps = downloadResults.reduce((a, b) => a + b, 0) / downloadResults.length;
+        const avgDownloadMbps = parseFloat(formatMbps(avgDownloadBps));
+        document.getElementById("metric-download").textContent = avgDownloadMbps.toFixed(2);
+        document.getElementById("metric-download-tag").textContent = rateDownload(avgDownloadMbps);
+
+        // ---- UPLOAD ----
+        setPhase("Upload", "0.00", "Mbps", "Measuring upload to SmartHydroFarm…");
+        let uploadResults = [];
+        for (let i = 0; i < SPEEDTEST_CONFIG.uploadIterations; i++) {
+          const stepIndex = SPEEDTEST_CONFIG.downloadIterations + i;
+          const totalSteps = SPEEDTEST_CONFIG.downloadIterations + SPEEDTEST_CONFIG.uploadIterations + 1;
+          setProgress((stepIndex / totalSteps) * 100);
+          setRingRotation(((stepIndex + 0.5) / totalSteps) * 100);
+
+          const bps = await measureUploadOnce();
+          uploadResults.push(bps);
+
+          const currentMbps = formatMbps(bps);
+          setPhase("Upload", currentMbps, "Mbps", `Upload test ${i + 1} of ${SPEEDTEST_CONFIG.uploadIterations}`);
+        }
+
+        const avgUploadBps = uploadResults.reduce((a, b) => a + b, 0) / uploadResults.length;
+        const avgUploadMbps = parseFloat(formatMbps(avgUploadBps));
+        document.getElementById("metric-upload").textContent = avgUploadMbps.toFixed(2);
+        document.getElementById("metric-upload-tag").textContent = rateUpload(avgUploadMbps);
+
+        // ---- PING / LATENCY ----
+        setPhase("Latency", "0", "ms", "Checking latency…");
+        let pingResults = [];
+        for (let i = 0; i < SPEEDTEST_CONFIG.pingIterations; i++) {
+          const stepIndex = SPEEDTEST_CONFIG.downloadIterations + SPEEDTEST_CONFIG.uploadIterations + i;
+          const totalSteps = SPEEDTEST_CONFIG.downloadIterations + SPEEDTEST_CONFIG.uploadIterations + SPEEDTEST_CONFIG.pingIterations;
+          setProgress((stepIndex / totalSteps) * 100);
+          setRingRotation(((stepIndex + 0.5) / totalSteps) * 100);
+
+          const ms = await measurePingOnce();
+          pingResults.push(ms);
+          setPhase("Latency", ms.toFixed(0), "ms", `Ping ${i + 1} of ${SPEEDTEST_CONFIG.pingIterations}`);
+        }
+
+        const avgPing = pingResults.reduce((a, b) => a + b, 0) / pingResults.length;
+        document.getElementById("metric-ping").textContent = avgPing.toFixed(0);
+        document.getElementById("metric-ping-tag").textContent = ratePing(avgPing);
+
+        // Final main display: show download as main number
+        setPhase("Download", avgDownloadMbps.toFixed(2), "Mbps", "Test complete.");
+        setProgress(100);
+        setRingRotation(100);
+        updateStatus("Test complete · Ready to run again", false);
+      } catch (err) {
+        console.error(err);
+        setError("Speed test failed. Please check your server endpoints and network connection.");
+        setPhase("Error", "–", "", "Something went wrong.");
+        updateStatus("Error during test", false);
+      } finally {
+        startBtn.disabled = false;
+        startBtn.dataset.loading = "false";
+        startLabel.textContent = "Start Test";
+      }
+    }
+
+    // ========= INIT =========
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("server-url").textContent = SPEEDTEST_CONFIG.serverBaseUrl;
+      const startBtn = document.getElementById("start-btn");
+
+      startBtn.addEventListener("click", () => {
+        runSpeedTest();
+      });
+    });
+  </script>
+</body>
+</html>
