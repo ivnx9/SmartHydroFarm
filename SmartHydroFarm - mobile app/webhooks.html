@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Webhooks (Mobile App Page)</title>
+  <script src="ds:/Sys/app.js"></script>
+ <script src="variables.js"></script>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#fff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --dark:#111827;
+      --shadow:0 6px 18px rgba(17,24,39,.06);
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+    body{background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+
+    /* no top header – your app has its own */
+    .app-scroll{height:100vh;overflow-y:auto;padding:12px 12px 24px}
+
+    .mcard{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      margin-bottom:12px;
+    }
+    .mcard-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}
+    .mcard-title{font-size:14px;font-weight:900}
+    .mcard-sub{margin-top:2px;font-size:12px;color:var(--muted);line-height:1.35}
+
+    .badge{
+      font-size:11px;font-weight:900;
+      padding:6px 10px;border-radius:999px;
+      background:#f3f4f6;border:1px solid var(--border);
+      white-space:nowrap;
+    }
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field.full{grid-column:1/-1}
+    .field label{font-size:11px;color:var(--muted);font-weight:800}
+    .field input,.field select{
+      padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;font-size:13px;outline:none;color:var(--text)
+    }
+    .field input:focus,.field select:focus{border-color:var(--dark)}
+
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{
+      border:1px solid var(--border);
+      background:#fff;color:var(--text);
+      padding:10px 12px;border-radius:14px;
+      font-size:12px;font-weight:900;cursor:pointer;
+      transition:transform .08s, box-shadow .2s, background .2s, border-color .2s;
+      box-shadow:0 6px 18px rgba(17,24,39,.05);
+    }
+    button:active{transform:translateY(1px)}
+    button.primary{
+      background:var(--dark);border-color:var(--dark);color:#fff;
+    }
+    button.danger{
+      border-color:#fecaca;background:#fff;color:#b91c1c;
+    }
+    button:disabled{opacity:.6;cursor:not-allowed;box-shadow:none}
+
+    .status{margin-top:10px;font-size:12px;color:var(--muted);min-height:16px;line-height:1.35}
+
+    /* Device list */
+    .device-list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .device-row{
+      background:#fff;border:1px solid var(--border);
+      border-radius:14px;padding:12px;
+      display:flex;gap:10px;align-items:flex-start;justify-content:space-between;
+      box-shadow:0 6px 18px rgba(17,24,39,.04);
+      cursor:pointer;
+    }
+    .device-row.active{
+      border-color:var(--dark);
+      box-shadow:0 10px 26px rgba(17,24,39,.10);
+    }
+    .device-meta{flex:1}
+    .device-id{font-size:13px;font-weight:900}
+    .device-sub{margin-top:2px;font-size:11px;color:var(--muted);line-height:1.35}
+    .device-actions{display:flex;gap:8px;flex:0 0 auto}
+    .device-actions button{padding:8px 10px;border-radius:12px;font-size:11px;box-shadow:none}
+
+    /* Output */
+    pre{
+      margin-top:10px;
+      background:#0b0f19;
+      color:#a7f3d0;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;
+      padding:12px;
+      font-size:11px;
+      overflow:auto;
+      max-height:320px;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+    }
+
+    @media (max-width:360px){
+      .form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<script> /*
+
+*/ </script>
+<body onload="setJwtToken()">
+  <div class="app-scroll" id="webhooksPage">
+
+    <!-- Card: JWT + Active Device -->
+    <div class="mcard">
+      <div class="mcard-head">
+        <div>
+          <div class="mcard-title">API Webhooks & Device Manager</div>
+          <div class="mcard-sub">Manage devices and test webhook endpoints.</div>
+        </div>
+        <span class="badge" id="whBadge">JWT: not set</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field full">
+          <label>Active Device (used by tester + other pages)</label>
+          <select id="whActiveDeviceSelect">
+            <option value="">No device loaded</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="status" id="whActiveInfo">Active device: --</div>
+    </div>
+
+    <!-- Card: Add Device -->
+    <div class="mcard">
+      <div class="mcard-head">
+        <div>
+          <div class="mcard-title">Add Device</div>
+          <div class="mcard-sub">Registers a device to this user account using your device_admin.php API.</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Device ID</label>
+          <input id="whDevIdInput" placeholder="e.g. SHVF-V1" />
+        </div>
+        <div class="field">
+          <label>Device Code</label>
+          <input id="whDevCodeInput" placeholder="e.g. 12345" />
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="primary" id="whBtnAdd">Add Device</button>
+        <button id="whBtnRefresh">Refresh Devices</button>
+      </div>
+
+      <div class="status" id="whDevStatus"></div>
+    </div>
+
+    <!-- Card: Your Devices -->
+    <div class="mcard">
+      <div class="mcard-head">
+        <div>
+          <div class="mcard-title">Your Devices</div>
+          <div class="mcard-sub">Tap a device to set it as active. You can also remove a device.</div>
+        </div>
+        <span class="badge" id="whCountBadge">0 devices</span>
+      </div>
+
+      <div class="device-list" id="whDeviceList">
+        <div style="font-size:12px;color:var(--muted);">No devices loaded yet.</div>
+      </div>
+    </div>
+
+    <!-- Card: Webhook Tester -->
+    <div class="mcard">
+      <div class="mcard-head">
+        <div>
+          <div class="mcard-title">Webhook Tester</div>
+          <div class="mcard-sub">Quickly test <code>webhook.php</code> using the active device.</div>
+        </div>
+        <span class="badge" id="whTesterBadge">Testing: --</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="primary" id="whBtnTestPanel">GET cmd=panel</button>
+        <button id="whBtnSendDummy">POST dummy sensor</button>
+      </div>
+
+      <pre id="whOutput">// output...</pre>
+    </div>
+
+  </div>
+
+  <script>
+    /* ============================================================
+      MOBILE WEBHOOKS PAGE (APP STYLE)
+      - JWT is a VARIABLE (you set it via setJwtToken())
+      - Device ID + Code can be read via getActiveDevice()
+      - Device list uses user-auth endpoint (device_admin.php) with JWT
+      - Tester talks directly to webhook.php using active device
+    ============================================================ */
+
+    /* ====== ENDPOINTS (edit if needed) ====== */
+    const API_WEBHOOK = "https://smarthydrofarm.com/api/webhook.php";
+    const API_DEVICE_ADMIN = "https://smarthydrofarm.com/api/device_admin.php";
+
+    /* ============================================================
+      1) JWT HANDLING (VARIABLE)
+      - You asked: "make the jwt side as a variable instead so i can set the jwt"
+      - Use setJwtToken("...") from your app after login.
+    ============================================================ */
+
+    // JWT variable (NOT auto-loaded from localStorage)
+    let JWT_TOKEN = ""; // <-- set using setJwtToken()
+  
+   
+    function setJwtToken(){ 
+   
+          var token = app.LoadText(TOKEN_KEY, "");
+      //app.Alert(token);
+
+          // app.Alert(token);
+         JWT_TOKEN = (token || "").trim();
+        renderJwtBadge();
+    }
+
+    function getJwtToken(){
+      return JWT_TOKEN;
+    }
+
+    function renderJwtBadge(){
+      const b = document.getElementById("whBadge");
+      if (!b) return;
+      b.textContent = JWT_TOKEN ? "JWT: set" : "JWT: not set";
+           loadDevices();
+    }
+
+    /* ============================================================
+      2) ACTIVE DEVICE HANDLING (GLOBAL-LIKE FUNCTIONS)
+      - You asked: "make a way where i can get the name ad code of the device"
+      - Device "name" here is device_id (your identifier)
+    ============================================================ */
+
+    let ACTIVE_DEVICE = {
+      device_id: app.LoadText( "shvf_device_id" ) || "",   //localStorage.getItem("shvf_device_id") || "",
+      device_code: app.LoadText("shvf_device_code") || ""  // localStorage.getItem("shvf_device_code") || ""
+    };
+
+    function setActiveDevice(device_id, device_code){
+      ACTIVE_DEVICE.device_id = device_id || "";
+      ACTIVE_DEVICE.device_code = device_code || "";
+
+      // optional persistence for other pages
+     app.SaveText( "shvf_device_id", ACTIVE_DEVICE.device_id )
+     app.SaveText( "shvf_device_code", ACTIVE_DEVICE.device_code )
+     //app.ShowPopup( "Device '"+ app.LoadText( "shvf_device_id" )+"' loaded successfuly!" )
+    //app.ShowPopup( "device saved." )
+   //   localStorage.setItem("shvf_device_id", ACTIVE_DEVICE.device_id);
+      // localStorage.setItem("shvf_device_code", ACTIVE_DEVICE.device_code);
+
+      renderActiveDeviceUI();
+       
+    }
+
+    // ✅ This is the function you asked for (returns name/id + code)
+    function getActiveDevice(){
+      // returns { device_id, device_code }
+      return { ...ACTIVE_DEVICE };
+    }
+
+    function renderActiveDeviceUI(){
+      const info = document.getElementById("whActiveInfo");
+      const tester = document.getElementById("whTesterBadge");
+      const sel = document.getElementById("whActiveDeviceSelect");
+
+      const id = ACTIVE_DEVICE.device_id || "--";
+      const code = ACTIVE_DEVICE.device_code || "--";
+
+      if (info) info.textContent = `Active device: ${id}  •  Code: ${code}`;
+      if (tester) tester.textContent = `Testing: ${id}`;
+
+      // If select exists, set selected option
+      if (sel && ACTIVE_DEVICE.device_id){
+        sel.value = ACTIVE_DEVICE.device_id;
+      }
+    }
+
+    /* ============================================================
+      3) FETCH HELPERS
+    ============================================================ */
+
+    function setStatus(elId, txt){
+      const el = document.getElementById(elId);
+      if (el) el.textContent = txt || "";
+    }
+
+    function setOutput(txt){
+      const out = document.getElementById("whOutput");
+      if (out) out.textContent = txt || "";
+    }
+
+    function authHeaders(extra = {}){
+      // If JWT not set, still return headers but without Authorization
+      const h = { ...extra };
+      if (JWT_TOKEN) h["Authorization"] = "Bearer " + JWT_TOKEN;
+      return h;
+    }
+
+    /* ============================================================
+      4) DEVICE ADMIN API (JWT-PROTECTED)
+      Expected same as your earlier design:
+      GET  api/device_admin.php  -> [ { id, device_id, device_code, last_seen }, ... ]
+      POST api/device_admin.php  { action:"create", device_id, device_code }
+      POST api/device_admin.php  { action:"delete", device_id }
+    ============================================================ */
+
+    let DEVICES = []; // cached devices from device_admin.php
+
+    async function loadDevices(){
+      const list = document.getElementById("whDeviceList");
+      const sel = document.getElementById("whActiveDeviceSelect");
+      const countBadge = document.getElementById("whCountBadge");
+
+      if (!JWT_TOKEN){
+        if (list) list.innerHTML = `<div style="font-size:12px;color:var(--muted);">JWT not set. Call <b>setJwtToken(token)</b> after login.</div>`;
+        if (sel) sel.innerHTML = `<option value="">JWT required</option>`;
+        if (countBadge) countBadge.textContent = "0 devices";
+        return;
+      }
+
+      if (list) list.innerHTML = `<div style="font-size:12px;color:var(--muted);">Loading devices...</div>`;
+      setStatus("whDevStatus", "");
+
+      try{
+        const res = await fetch(API_DEVICE_ADMIN, {
+          method: "GET",
+          headers: authHeaders()
+        });
+
+        const text = await res.text();
+        if (!res.ok){
+          throw new Error(`device_admin GET ${res.status}: ${text || "(no body)"}`);
+        }
+
+        let data;
+        try{ data = JSON.parse(text); }
+        catch(e){ throw new Error("device_admin returned invalid JSON: " + text); }
+
+        if (!Array.isArray(data)) throw new Error("device_admin response is not an array.");
+
+        DEVICES = data;
+
+        // update count badge
+        if (countBadge) countBadge.textContent = `${DEVICES.length} device${DEVICES.length === 1 ? "" : "s"}`;
+
+        // fill select
+        if (sel){
+          if (!DEVICES.length){
+            sel.innerHTML = `<option value="">No devices</option>`;
+          } else {
+            sel.innerHTML = DEVICES.map(d => `<option value="${d.device_id}">${d.device_id}</option>`).join("");
+          }
+        }
+
+        // pick active if missing or not found
+        const found = DEVICES.find(d => d.device_id === ACTIVE_DEVICE.device_id);
+        if (!found && DEVICES.length){
+          // default to latest by id field, else first
+          const sorted = [...DEVICES].sort((a,b)=> (a.id||0)-(b.id||0));
+          const pick = sorted[sorted.length-1] || DEVICES[0];
+          setActiveDevice(pick.device_id, pick.device_code);
+        } else if (found){
+          // ensure code is synced
+          setActiveDevice(found.device_id, found.device_code);
+        } else {
+          renderActiveDeviceUI();
+        }
+
+        // render list
+        if (list){
+          if (!DEVICES.length){
+            list.innerHTML = `<div style="font-size:12px;color:var(--muted);">No devices yet. Add one above.</div>`;
+          } else {
+            list.innerHTML = DEVICES.map(d => {
+              const isActive = d.device_id === ACTIVE_DEVICE.device_id;
+              return `
+                <div class="device-row ${isActive ? "active" : ""}" data-id="${d.device_id}">
+                  <div class="device-meta">
+                    <div class="device-id">${d.device_id}</div>
+                    <div class="device-sub">Code: ${d.device_code} • DB id: ${d.id ?? "?"}</div>
+                    ${d.last_seen ? `<div class="device-sub">Last seen: ${d.last_seen}</div>` : ``}
+                  </div>
+                  <div class="device-actions">
+                    <button class="primary" data-act="set" data-id="${d.device_id}">Active</button>
+                    <button class="danger" data-act="del" data-id="${d.device_id}">Remove</button>
+                  </div>
+                </div>
+              `;
+            }).join("");
+          }
+        }
+
+        // attach click events (delegation)
+        if (list){
+          list.onclick = async (e) => {
+            const btn = e.target.closest("button");
+            const row = e.target.closest(".device-row");
+            const id = (btn?.dataset?.id) || (row?.dataset?.id);
+
+            if (!id) return;
+
+            const device = DEVICES.find(d => d.device_id === id);
+            if (!device) return;
+
+            // If user taps the row, set active
+            if (!btn){
+              setActiveDevice(device.device_id, device.device_code);
+              highlightActiveRow();
+              return;
+            }
+
+            const act = btn.dataset.act;
+
+            if (act === "set"){
+              setActiveDevice(device.device_id, device.device_code);
+              highlightActiveRow();
+              return;
+            }
+
+            if (act === "del"){
+              if (!confirm(`Remove device "${id}"?`)) return;
+              await deleteDevice(id);
+              await loadDevices();
+              return;
+            }
+          };
+        }
+
+        // select onchange
+        if (sel){
+          sel.onchange = () => {
+            const chosenId = sel.value;
+            const device = DEVICES.find(d => d.device_id === chosenId);
+            if (!device) return;
+            setActiveDevice(device.device_id, device.device_code);
+            highlightActiveRow();
+          };
+        }
+
+        highlightActiveRow();
+
+      }catch(e){
+        console.error(e);
+        if (list) list.innerHTML = `<div style="font-size:12px;color:#b91c1c;">Error loading devices: ${e.message}</div>`;
+        if (sel) sel.innerHTML = `<option value="">Error</option>`;
+        if (countBadge) countBadge.textContent = "0 devices";
+      }
+    }
+
+    function highlightActiveRow(){
+      const list = document.getElementById("whDeviceList");
+      if (!list) return;
+      [...list.querySelectorAll(".device-row")].forEach(el => {
+        el.classList.toggle("active", el.dataset.id === ACTIVE_DEVICE.device_id);
+      });
+    }
+
+    async function createDevice(device_id, device_code){
+      const res = await fetch(API_DEVICE_ADMIN, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type":"application/json" }),
+        body: JSON.stringify({ action:"create", device_id, device_code })
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(`create device ${res.status}: ${text || "(no body)"}`);
+      try{ return JSON.parse(text); }catch(e){ throw new Error("create device invalid JSON: " + text); }
+    }
+
+    async function deleteDevice(device_id){
+      const res = await fetch(API_DEVICE_ADMIN, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type":"application/json" }),
+        body: JSON.stringify({ action:"delete", device_id })
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(`delete device ${res.status}: ${text || "(no body)"}`);
+      try{ return JSON.parse(text); }catch(e){ throw new Error("delete device invalid JSON: " + text); }
+    }
+
+    /* ============================================================
+      5) WEBHOOK TESTER (DEVICE ID + CODE)
+      - Uses ACTIVE_DEVICE only (no JWT needed unless your webhook requires it)
+    ============================================================ */
+
+    async function webhookPanel(){
+      const { device_id, device_code } = getActiveDevice();
+      if (!device_id || !device_code) throw new Error("No active device selected.");
+
+      const url = `${API_WEBHOOK}?cmd=panel`
+        + `&device_id=${encodeURIComponent(device_id)}`
+        + `&device_code=${encodeURIComponent(device_code)}`;
+
+      const res = await fetch(url, { credentials:"same-origin" });
+      const text = await res.text();
+      if (!res.ok) throw new Error(`webhook panel ${res.status}: ${text || "(no body)"}`);
+      try{ return JSON.parse(text); }catch(e){ throw new Error("webhook panel invalid JSON: " + text); }
+    }
+
+    async function webhookSendDummy(){
+      const { device_id, device_code } = getActiveDevice();
+      if (!device_id || !device_code) throw new Error("No active device selected.");
+
+      const now = new Date();
+      const payload = {
+        device_id,
+        device_code,
+        plant: "test",
+        ph: 6.1,
+        ppm: 650,
+        waterTemp: 23.4,
+        temp: 30.2,
+        humidity: 70.1,
+        drumD: 12.3,
+        drumDepth: 37.7,
+        drumLiters: 45.8,
+        hour: now.getHours(),
+        minute: now.getMinutes(),
+        second: now.getSeconds()
+      };
+
+      const res = await fetch(API_WEBHOOK, {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(payload),
+        credentials:"same-origin"
+      });
+      const text = await res.text();
+      if (!res.ok) throw new Error(`webhook dummy ${res.status}: ${text || "(no body)"}`);
+      try{ return JSON.parse(text); }catch(e){ throw new Error("webhook dummy invalid JSON: " + text); }
+    }
+
+    /* ============================================================
+      6) UI EVENTS
+    ============================================================ */
+
+    function bindUI(){
+      renderJwtBadge();
+      renderActiveDeviceUI();
+
+      document.getElementById("whBtnRefresh").onclick = loadDevices;
+
+      document.getElementById("whBtnAdd").onclick = async () => {
+        const idEl = document.getElementById("whDevIdInput");
+        const codeEl = document.getElementById("whDevCodeInput");
+        const id = (idEl.value || "").trim();
+        const code = (codeEl.value || "").trim();
+
+        if (!JWT_TOKEN){
+          setStatus("whDevStatus", "JWT not set. Call setJwtToken(token) first.");
+          return;
+        }
+        if (!id || !code){
+          setStatus("whDevStatus", "Please enter both Device ID and Device Code.");
+          return;
+        }
+
+        setStatus("whDevStatus", "Saving device...");
+        try{
+          const out = await createDevice(id, code);
+          setStatus("whDevStatus", out.message || "Device saved.");
+          idEl.value = "";
+          codeEl.value = "";
+          await loadDevices();
+        }catch(e){
+          setStatus("whDevStatus", "Error: " + e.message);
+        }
+      };
+
+      document.getElementById("whBtnTestPanel").onclick = async () => {
+        setOutput("Loading panel...");
+        try{
+          const data = await webhookPanel();
+          setOutput(JSON.stringify(data, null, 2));
+        }catch(e){
+          setOutput("Error: " + e.message);
+        }
+      };
+
+      document.getElementById("whBtnSendDummy").onclick = async () => {
+        setOutput("Sending dummy sensor data...");
+        try{
+          const data = await webhookSendDummy();
+          setOutput(JSON.stringify(data, null, 2));
+        }catch(e){
+          setOutput("Error: " + e.message);
+        }
+      };
+    }
+
+    /* ============================================================
+      7) EXPOSE FUNCTIONS FOR YOUR APP
+      - You can call these from outside (your main app shell)
+    ============================================================ */
+    window.SHVF = window.SHVF || {};
+    window.SHVF.setJwtToken = setJwtToken;
+    window.SHVF.getJwtToken = getJwtToken;
+
+    window.SHVF.setActiveDevice = setActiveDevice;
+    window.SHVF.getActiveDevice = getActiveDevice;
+
+    window.SHVF.loadDevices = loadDevices;
+
+    /* ============================================================
+      INIT
+    ============================================================ */
+    
+   document.addEventListener("DOMContentLoaded", async () => {
+      bindUI();
+
+      // OPTIONAL: If you want to auto-use saved JWT when present,
+      // uncomment these lines. (You asked JWT variable, so default is OFF.)
+   
+    //   const saved = localStorage.getItem("jwt_token") || "";
+      // if (saved) setJwtToken(saved);
+      
+      // Load devices only if JWT already set by your app shell
+      if (JWT_TOKEN) await loadDevices();
+    });
+
+    /* ============================================================
+      QUICK EXAMPLE (HOW YOU WILL USE THIS IN YOUR APP)
+      After login success:
+        SHVF.setJwtToken(tokenFromLogin);
+        SHVF.loadDevices();
+      To get device name/id + code anytime:
+        const { device_id, device_code } = SHVF.getActiveDevice();
+    ============================================================ */
+  </script>
+</body>
+</html>
