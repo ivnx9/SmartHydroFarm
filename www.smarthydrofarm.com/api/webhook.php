@@ -263,21 +263,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         json_response($resp);
     }
-
-    // ---- Default: sensor data logging ----
-    /*
-    $plant=$in['plant']??null;$ph=$in['ph']??null;$tds=$in['ppm']??null;$wt= $in['waterTemp']??null;
-    $air=$in['temp']??null;$hum=$in['humidity']??null;$h=$in['hour']??null;$m=$in['minute']??null;$s=$in['second']??null;
-
-    $sql="INSERT INTO sensor_data (device_id,plant,ph,tds,water_temp,air_temp,humidity,hour,minute,second)
-          VALUES (?,?,?,?,?,?,?,?,?,?)";
-    $stmt=$conn->prepare($sql);
-    if(!$stmt) json_response(["status"=>"error","message"=>"Prepare failed: insert sensor_data"],500);
-    $stmt->bind_param("ssddddddii",$device_id,$plant,$ph,$tds,$wt,$air,$hum,$h,$m,$s);
-    $stmt->execute(); $stmt->close();
-
-    json_response(["status"=>"data_received"]);
-    */
     
     // ---- Default: sensor data logging ----
     // Basic sensors
