@@ -19,7 +19,13 @@
 The system integrates environmental sensors, microcontrollers, automation hardware, and a web-based monitoring platform to maintain optimal growing conditions by monitoring important parameters such as **pH level, Total Dissolved Solids (TDS), water temperature, air temperature, and humidity**.
 
 Developed as a capstone research project, SmartHydroFarm aims to provide a sustainable and efficient approach to urban farming by reducing manual monitoring and improving resource management through automation.
-<a href="https://smarthydrofarm.com" target="_blank">Visit our website here.</a>
+
+---
+
+## DEMO
+
+Smart Hydro Farm Website | <a href="https://smarthydrofarm.com" target="_blank">View here.</a></br> 
+Smart Hydro Farm App | <a href="https://play.google.com/store/apps/details?id=com.smarthydrofarm.shvf" target="_blank">Download here.</a>
 
 ---
 
