@@ -55,38 +55,13 @@ Developed as a capstone research project, SmartHydroFarm aims to provide a susta
 
 ## 🏗️ System Architecture
 
-```text
-┌───────────────┐
-│    Sensors    │
-└───────┬───────┘
-        │
-        ↓
-┌───────────────┐
-│ Arduino Nano  │
-└───────┬───────┘
-        │
-        ↓
-┌───────────────┐
-│   ESP32-S3    │
-│  Controller   │
-└───────┬───────┘
-        │
-        ↓
-┌──────────────────┐
-│ HTTP Communication│
-└────────┬─────────┘
-         │
-         ↓
-┌──────────────────┐
-│ Web Server &     │
-│ Database         │
-└────────┬─────────┘
-         │
-         ↓
-┌──────────────────┐
-│ SmartHydroFarm   │
-│ Dashboard        │
-└──────────────────┘
+```mermaid
+flowchart TD
+    A[Sensors] --> B[Arduino Nano]
+    B --> C[ESP32-S3 Controller]
+    C --> D[HTTP Communication]
+    D --> E[Web Server & Database]
+    E --> F[SmartHydroFarm Dashboard]
 
 ---
 
