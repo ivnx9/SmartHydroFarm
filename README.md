@@ -62,7 +62,7 @@ flowchart TD
     C --> D[HTTP Communication]
     D --> E[Web Server & Database]
     E --> F[SmartHydroFarm Dashboard]
-```mermaid
+```
 ---
 
 ## 🛠️ Hardware Components
