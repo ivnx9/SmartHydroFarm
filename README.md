@@ -1,6 +1,6 @@
-# SmartHydroFarm 🌱
+# SmartHydroFarm 🌱 
 <p align="center">
-  <img onclick="alert('https://smarthydrofarm.com');" src="shvf-banner.png" alt="Ivan Movies Banner" width="100%">
+  <img src="shvf-banner.png" alt="Ivan Movies Banner" width="100%">
 </p>
 <p align="center">
   <b>Solar-Powered Automated System with Remote Monitoring and Control for Smart Hydroponic Vertical Farming</b>
@@ -19,6 +19,7 @@
 The system integrates environmental sensors, microcontrollers, automation hardware, and a web-based monitoring platform to maintain optimal growing conditions by monitoring important parameters such as **pH level, Total Dissolved Solids (TDS), water temperature, air temperature, and humidity**.
 
 Developed as a capstone research project, SmartHydroFarm aims to provide a sustainable and efficient approach to urban farming by reducing manual monitoring and improving resource management through automation.
+<a href="https://smarthydrofarm.com" target="_blank">Visit our website here.</a>
 
 ---
 
