@@ -1,6 +1,6 @@
 # SmartHydroFarm 🌱
 <p align="center">
-  <img href="https://smarthydrofarm.com" src="shvf-banner.png" alt="Ivan Movies Banner" width="100%">
+  <img onclick="alert('https://smarthydrofarm.com');" src="shvf-banner.png" alt="Ivan Movies Banner" width="100%">
 </p>
 <p align="center">
   <b>Solar-Powered Automated System with Remote Monitoring and Control for Smart Hydroponic Vertical Farming</b>
