@@ -331,6 +331,159 @@
 }
 
 
+
+    .gallery-section{
+    padding:90px 8% 60px;
+    text-align:center;
+  }
+  .gallery-section h2{
+    font-size:clamp(1.8rem,4vw,2.5rem);
+    margin-bottom:10px;
+  }
+  .gallery-track-wrapper{
+    overflow-x:auto;
+    overflow-y:hidden;
+    width:100%;
+    cursor:grab;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    user-select:none;
+  }
+  .gallery-track-wrapper::-webkit-scrollbar{ display:none; }
+  .gallery-track-wrapper.grabbing{ cursor:grabbing; }
+  .gallery-track{
+    display:flex;
+    gap:22px;
+    width:max-content;
+  }
+  .gallery-track img{
+  height:240px;
+  width:auto;
+  min-width:200px; /* add this */
+  border-radius:var(--radius);
+  object-fit:cover;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  transition:transform .3s ease;
+  flex-shrink:0;
+  -webkit-user-drag:none;
+}
+  .gallery-track img:hover{
+    transform:translateY(-6px) scale(1.03);
+  }
+
+  .lightbox{
+    display:none;
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,.92);
+    z-index:2000;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:24px;
+    padding:20px;
+  }
+  .lightbox.active{ display:flex; }
+  .lightbox img{
+    max-width:90%;
+    max-height:70vh;
+    border-radius:var(--radius);
+    box-shadow:0 20px 60px rgba(0,255,140,.25);
+  }
+  .lightbox-close{
+    position:absolute;
+    top:20px;right:30px;
+    font-size:2.5rem;
+    color:#fff;
+    cursor:pointer;
+    line-height:1;
+  }
+  .lightbox .cta-btn{
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  @media(max-width:768px){
+    .gallery-section{ padding:60px 5% 40px; }
+    .gallery-track{ gap:14px; }
+    .gallery-track img{ height:170px; }
+  }
+  @media(max-width:480px){
+    .gallery-track img{ height:140px; }
+    .lightbox-close{ font-size:2rem; top:14px; right:18px; }
+  }
+  
+  
+  
+  
+  
+  .speedtest-banner{
+  max-width:900px;
+  margin:60px auto;
+  padding:36px 40px;
+  background:var(--card);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:30px;
+  flex-wrap:wrap;
+}
+
+.speedtest-content{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  flex:1;
+  min-width:240px;
+}
+
+.speedtest-content i{
+  font-size:2.2rem;
+  color:var(--accent);
+  flex-shrink:0;
+}
+
+.speedtest-content h3{
+  font-size:1.2rem;
+  margin-bottom:6px;
+}
+
+.speedtest-content p{
+  opacity:.75;
+  font-size:.95rem;
+  line-height:1.5;
+  max-width:420px;
+}
+
+.speedtest-banner .cta-btn{
+  white-space:nowrap;
+}
+
+@media(max-width:768px){
+  .speedtest-banner{
+    padding:28px 24px;
+    margin:40px 5%;
+    flex-direction:column;
+    text-align:center;
+  }
+  .speedtest-content{
+    flex-direction:column;
+    text-align:center;
+  }
+  .speedtest-content p{
+    max-width:100%;
+  }
+}
+
   </style>
  <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -415,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </p>
 
       <div class="store-buttons">
-        <a href="#" class="store-btn">
+        <a href="https://play.google.com/store/apps/details?id=com.smarthydrofarm.shvf&pcampaignid=web_share" class="store-btn">
           <i class="fab fa-google-play"></i>
           <div>
             <small>Get it on</small>
@@ -476,9 +629,201 @@ document.addEventListener('DOMContentLoaded', () => {
 
   </div>
 </section>
+<!-- Project Gallery Carousel -->
+<section class="gallery-section">
+  <h2>Our <span style="color:var(--accent)">Project Gallery</span></h2>
+  <p style="opacity:.75;max-width:600px;margin:0 auto 40px">
+    A look at our towers, setup, and harvests. Click any photo for full view.
+  </p>
 
-<br/>
-        <center><button onclick="window.location.href='speedtest.html'" class="cta-btn" >feeling slow? try our speedtest!</button></center>
+  <div class="gallery-track-wrapper" id="galleryWrapper">
+    <div class="gallery-track" id="galleryTrack">
+      <!-- Replace these src paths with your actual project photos -->
+      <img src="images/gallery/photo1.jpg" alt="Project photo 1" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo2.jpg" alt="Project photo 2" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo3.jpg" alt="Project photo 3" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo4.jpg" alt="Project photo 4" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo5.jpg" alt="Project photo 5" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo6.jpg" alt="Project photo 6" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo7.jpg" alt="Project photo 7" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo8.jpg" alt="Project photo 8" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo9.jpg" alt="Project photo 9" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo10.jpg" alt="Project photo 10" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo11.jpg" alt="Project photo 11" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo12.jpg" alt="Project photo 12" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo13.jpg" alt="Project photo 13" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo14.jpg" alt="Project photo 14" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo15.jpg" alt="Project photo 15" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo16.jpg" alt="Project photo 16" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo17.jpg" alt="Project photo 17" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo18.jpg" alt="Project photo 18" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo19.jpg" alt="Project photo 19" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo20.jpg" alt="Project photo 20" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo21.jpg" alt="Project photo 21" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo22.jpg" alt="Project photo 22" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo23.jpg" alt="Project photo 23" onclick="openLightbox(this.src)">
+      <!--img src="images/gallery/photo24.jpg" alt="Project photo 24" onclick="openLightbox(this.src)"-->
+      <img src="images/gallery/photo25.jpg" alt="Project photo 25" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo26.jpg" alt="Project photo 26" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo27.jpg" alt="Project photo 27" onclick="openLightbox(this.src)">
+      <!-- Duplicate set for seamless infinite loop - keep identical to above -->
+      <img src="images/gallery/photo1.jpg" alt="Project photo 1" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo2.jpg" alt="Project photo 2" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo3.jpg" alt="Project photo 3" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo4.jpg" alt="Project photo 4" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo5.jpg" alt="Project photo 5" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo6.jpg" alt="Project photo 6" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo7.jpg" alt="Project photo 7" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo8.jpg" alt="Project photo 8" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo9.jpg" alt="Project photo 9" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo10.jpg" alt="Project photo 10" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo11.jpg" alt="Project photo 11" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo12.jpg" alt="Project photo 12" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo13.jpg" alt="Project photo 13" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo14.jpg" alt="Project photo 14" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo15.jpg" alt="Project photo 15" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo16.jpg" alt="Project photo 16" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo17.jpg" alt="Project photo 17" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo18.jpg" alt="Project photo 18" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo19.jpg" alt="Project photo 19" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo20.jpg" alt="Project photo 20" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo21.jpg" alt="Project photo 21" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo22.jpg" alt="Project photo 22" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo23.jpg" alt="Project photo 23" onclick="openLightbox(this.src)">
+      <!--img src="images/gallery/photo24.jpg" alt="Project photo 24" onclick="openLightbox(this.src)"-->
+      <img src="images/gallery/photo25.jpg" alt="Project photo 25" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo26.jpg" alt="Project photo 26" onclick="openLightbox(this.src)">
+      <img src="images/gallery/photo27.jpg" alt="Project photo 27" onclick="openLightbox(this.src)">
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox for full-view image + download -->
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+  <img id="lightboxImg" src="" alt="Full view">
+  <a id="downloadBtn" class="cta-btn" href="#" download>
+    <i class="fas fa-download"></i> Download Photo
+  </a>
+</div>
+<script>
+    
+  
+   /* ===== Auto-scroll + draggable carousel ===== */
+(function(){
+  const wrapper = document.getElementById('galleryWrapper');
+  const track = document.getElementById('galleryTrack');
+
+  const SPEED = 40; // pixels per second - increase for faster, decrease for slower
+  const RESUME_DELAY = 1200; // ms to wait after user interaction before auto-scroll resumes
+
+  let autoScroll = true;
+  let isDragging = false;
+  let startX = 0;
+  let scrollLeftStart = 0;
+  let resumeTimeout = null;
+  let lastTime = null;
+
+  function loop(timestamp){
+    if(lastTime === null) lastTime = timestamp;
+    const delta = (timestamp - lastTime) / 1000; // seconds since last frame
+    lastTime = timestamp;
+
+    if(autoScroll && !isDragging){
+      wrapper.scrollLeft += SPEED * delta;
+      const half = track.scrollWidth / 2;
+      if(half > 0 && wrapper.scrollLeft >= half){
+        wrapper.scrollLeft -= half;
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  function pause(){
+    autoScroll = false;
+    if(resumeTimeout) clearTimeout(resumeTimeout);
+  }
+  function resumeSoon(){
+    if(resumeTimeout) clearTimeout(resumeTimeout);
+    resumeTimeout = setTimeout(() => { autoScroll = true; }, RESUME_DELAY);
+  }
+
+  // Mouse drag
+  wrapper.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    wrapper.classList.add('grabbing');
+    startX = e.pageX;
+    scrollLeftStart = wrapper.scrollLeft;
+    pause();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if(!isDragging) return;
+    const moved = (e.pageX - startX) * 1.2;
+    wrapper.scrollLeft = scrollLeftStart - moved;
+  });
+  window.addEventListener('mouseup', () => {
+    if(!isDragging) return;
+    isDragging = false;
+    wrapper.classList.remove('grabbing');
+    resumeSoon();
+  });
+
+  // Touch drag (mobile)
+  wrapper.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    startX = e.touches[0].pageX;
+    scrollLeftStart = wrapper.scrollLeft;
+    pause();
+  }, {passive:true});
+  wrapper.addEventListener('touchmove', (e) => {
+    if(!isDragging) return;
+    const moved = (e.touches[0].pageX - startX) * 1.2;
+    wrapper.scrollLeft = scrollLeftStart - moved;
+  }, {passive:true});
+  wrapper.addEventListener('touchend', () => {
+    isDragging = false;
+    resumeSoon();
+  });
+
+  // Wheel / trackpad
+  wrapper.addEventListener('wheel', () => {
+    pause();
+    resumeSoon();
+  }, {passive:true});
+})();
+
+ function openLightbox(src){
+    const filename = src.split('/').pop();
+    document.getElementById('lightboxImg').src = src;
+    const dl = document.getElementById('downloadBtn');
+    dl.href = src;
+    dl.setAttribute('download', filename);
+    document.getElementById('lightbox').classList.add('active');
+  }
+  function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('active');
+  }
+  document.getElementById('lightbox').addEventListener('click', function(e){
+    if(e.target === this) closeLightbox();
+  });
+</script>
+
+<!--br/>
+        <center><button onclick="window.location.href='speedtest.html'" class="cta-btn" >feeling slow? try our speedtest!</button></center-->
+        
+    <section class="speedtest-banner">
+      <div class="speedtest-content">
+        <i class="fas fa-tachometer-alt"></i>
+        <div>
+          <h3>Check Your Connection</h3>
+          <p>Make sure your network can keep up with real-time IoT monitoring.</p>
+        </div>
+      </div>
+      <button onclick="window.location.href='speedtest.html'" class="cta-btn">
+        Run Speed Test
+      </button>
+    </section>
 
   <!-- Login / Sign-Up Section -->
   <section class="login-section" id="loginSection">
